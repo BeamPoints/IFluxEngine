@@ -13,8 +13,8 @@ FOR /R %%f in (*.c) do (
 SET assembly=engine
 SET compilerFlags=-g -shared -Wvarargs -Wall -Werror
 REM -Wall -Werror
-SET includeFlags=-Isrc -I%VULKAN_SDK%/Include
-SET linkerFlags=-luser32 -lvulkan-1 -L%VULKAN_SDK%/Lib
+SET includeFlags=-Isrc -I%VULKAN_SDK%/Include -I../ThirdParty/cglm-0.9.6/Include
+SET linkerFlags=-luser32 -lvulkan-1 -L%VULKAN_SDK%/Lib -L../ThirdParty/cglm-0.9.6/win/x64/Debug
 SET defines=-D_DEBUG -DFEXPORT -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building %assembly%%..."

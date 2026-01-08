@@ -13,8 +13,8 @@ assembly="engine"
 compilerFlags="-g -shared -fdeclspec -fPIC"
 # -fms-extensions 
 # -Wall -Werror
-includeFlags="-Isrc -I$VULKAN_SDK/include"
-linkerFlags="-lvulkan -lxcb -lX11 -lX11-xcb -lxkbcommon -L$VULKAN_SDK/lib -L/usr/X11R6/lib"
+includeFlags="-Isrc -I$VULKAN_SDK/include -I../ThirdParty/cglm-0.9.6/Include"
+linkerFlags="-lvulkan -lxcb -lX11 -lX11-xcb -lxkbcommon -L$VULKAN_SDK/lib -L/usr/X11R6/lib -L../ThirdParty/cglm-0.9.6/win/x64/Debug"
 defines="-D_DEBUG -DFEXPORT"
 
 echo "Building $assembly..."

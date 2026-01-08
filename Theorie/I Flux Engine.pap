@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<FRAME GUID="2FB25471-B62C-4EE6-BD43-F819C095ACF8" FORMAT="0000" APP_VERSION="2.2.0.8" CHECKSUM="C8E74D351A9867DF">
-  <PROJECT FORMAT="1.00" NAME="I Flux Engine 3D" AUTHOR="patri" CREATED="2026.01.08 01:54:10" MODIFIED="2026.01.08 03:00:23">
+<FRAME GUID="2FB25471-B62C-4EE6-BD43-F819C095ACF8" FORMAT="0000" APP_VERSION="2.2.0.8" CHECKSUM="03936F5FB18A8002">
+  <PROJECT FORMAT="1.00" NAME="I Flux Engine 3D" AUTHOR="patri" CREATED="2026.01.08 01:54:10" MODIFIED="2026.01.08 18:34:33">
     <DIAGRAMS>
       <DIAGRAM FORMAT="1.00" ID="1" NAME="GameEngineDiagram" CREATED="2026.01.08 02:57:40" MODIFIED="2026.01.08 02:57:40">
         <LAYOUT FORMAT="1.00" COLUMNS="4" ROWS="5">
@@ -58,6 +58,70 @@
           <CONNECTION FORMAT="1.00" ID="9" FROM="10" TO="6" TEXT="" />
           <CONNECTION FORMAT="1.00" ID="21" FROM="11" TO="5" TEXT="" />
           <CONNECTION FORMAT="1.00" ID="18" FROM="16" TO="5" TEXT="" />
+        </CONNECTIONS>
+      </DIAGRAM>
+      <DIAGRAM FORMAT="1.00" ID="2" NAME="PlatformLayer" CREATED="2026.01.08 18:29:08" MODIFIED="2026.01.08 18:29:08">
+        <LAYOUT FORMAT="1.00" COLUMNS="4" ROWS="6">
+          <ENTRIES>
+            <ENTRY COLUMN="0" ROW="1">
+              <FIGURE SUBTYPE="PapStart" FORMAT="1.00" ID="1">
+                <TEXT><![CDATA[Start]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="0" ROW="5">
+              <FIGURE SUBTYPE="PapEnd" FORMAT="1.00" ID="2">
+                <TEXT><![CDATA[Ende]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="1" ROW="3">
+              <FIGURE SUBTYPE="PapConnector" FORMAT="1.00" ID="10">
+                <TEXT><![CDATA[]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="1" ROW="4">
+              <FIGURE SUBTYPE="PapModule" FORMAT="1.00" ID="9">
+                <TEXT><![CDATA[platform_win.c]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="0" ANCHOR="True">
+              <FIGURE SUBTYPE="PapTitle" FORMAT="1.00" ID="0">
+                <TEXT><![CDATA[PlatformLayer]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="2">
+              <FIGURE SUBTYPE="PapActivity" FORMAT="1.00" ID="7">
+                <TEXT><![CDATA[Engine]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="3">
+              <FIGURE SUBTYPE="PapActivity" FORMAT="1.00" ID="4">
+                <TEXT><![CDATA[MainPlatform_Interface platform.h]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="4">
+              <FIGURE SUBTYPE="PapModule" FORMAT="1.00" ID="13">
+                <TEXT><![CDATA[platform_Linux.c]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="3" ROW="3">
+              <FIGURE SUBTYPE="PapConnector" FORMAT="1.00" ID="16">
+                <TEXT><![CDATA[]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="3" ROW="4">
+              <FIGURE SUBTYPE="PapModule" FORMAT="1.00" ID="15">
+                <TEXT><![CDATA[platform_Switch.c]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+          </ENTRIES>
+        </LAYOUT>
+        <CONNECTIONS>
+          <CONNECTION FORMAT="1.00" ID="8" FROM="4" TO="7" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="11" FROM="9" TO="10" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="12" FROM="10" TO="4" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="14" FROM="13" TO="4" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="17" FROM="15" TO="16" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="18" FROM="16" TO="4" TEXT="" />
         </CONNECTIONS>
       </DIAGRAM>
     </DIAGRAMS>
