@@ -4,8 +4,8 @@ REM It configures the necessary environment variables for 64-bit development.
 
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-SET includes=
-SET links=
+SET includes=/Isrc /I%VULKAN_SDK%/Include
+SET links=/link /LIBPATH:%VULKAN_SDK%/Lib vulkan-1.lib
 SET defines=
 
 echo "Building the project..."

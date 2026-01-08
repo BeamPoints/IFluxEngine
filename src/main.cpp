@@ -3,5 +3,10 @@
 
 int main() 
 {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "The Cake Is A Lie!" << std::endl;
+    std::cout << "Init Platform Layer" << std::endl;
+    
+
+    return 0;
 }
+

@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FRAME GUID="2FB25471-B62C-4EE6-BD43-F819C095ACF8" FORMAT="0000" APP_VERSION="2.2.0.8" CHECKSUM="C8E74D351A9867DF">
+  <PROJECT FORMAT="1.00" NAME="I Flux Engine 3D" AUTHOR="patri" CREATED="2026.01.08 01:54:10" MODIFIED="2026.01.08 03:00:23">
+    <DIAGRAMS>
+      <DIAGRAM FORMAT="1.00" ID="1" NAME="GameEngineDiagram" CREATED="2026.01.08 02:57:40" MODIFIED="2026.01.08 02:57:40">
+        <LAYOUT FORMAT="1.00" COLUMNS="4" ROWS="5">
+          <ENTRIES>
+            <ENTRY COLUMN="0" ROW="1">
+              <FIGURE SUBTYPE="PapStart" FORMAT="1.00" ID="1">
+                <TEXT><![CDATA[Start]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="0" ROW="4">
+              <FIGURE SUBTYPE="PapEnd" FORMAT="1.00" ID="2">
+                <TEXT><![CDATA[Ende]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="1" ROW="2">
+              <FIGURE SUBTYPE="PapActivity" FORMAT="1.00" ID="16">
+                <TEXT><![CDATA[HotReloadCode]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="1" ROW="3">
+              <FIGURE SUBTYPE="PapModule" FORMAT="1.00" ID="12">
+                <TEXT><![CDATA[Game.exe.sh]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="0" ANCHOR="True">
+              <FIGURE SUBTYPE="PapTitle" FORMAT="1.00" ID="0">
+                <TEXT><![CDATA[GameEngineDiagram]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="2">
+              <FIGURE SUBTYPE="PapCondition" FORMAT="1.00" ID="5">
+                <TEXT><![CDATA[IFluxEngine]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="2" ROW="3">
+              <FIGURE SUBTYPE="PapModule" FORMAT="1.00" ID="11">
+                <TEXT><![CDATA[EditorViewPort.exe.sh]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="3" ROW="2">
+              <FIGURE SUBTYPE="PapConnector" FORMAT="1.00" ID="6">
+                <TEXT><![CDATA[]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+            <ENTRY COLUMN="3" ROW="3">
+              <FIGURE SUBTYPE="PapModule" FORMAT="1.00" ID="10">
+                <TEXT><![CDATA[Editor.exe.sh]]></TEXT>
+              </FIGURE>
+            </ENTRY>
+          </ENTRIES>
+        </LAYOUT>
+        <CONNECTIONS>
+          <CONNECTION FORMAT="1.00" ID="15" FROM="12" TO="16" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="7" FROM="6" TO="5" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="9" FROM="10" TO="6" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="21" FROM="11" TO="5" TEXT="" />
+          <CONNECTION FORMAT="1.00" ID="18" FROM="16" TO="5" TEXT="" />
+        </CONNECTIONS>
+      </DIAGRAM>
+    </DIAGRAMS>
+  </PROJECT>
+</FRAME>
