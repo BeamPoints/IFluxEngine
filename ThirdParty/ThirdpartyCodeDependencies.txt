@@ -1,1 +1,15 @@
-cglm-0.9.6
+cglm-0.9.6;
+google-Highway-1.3.0;
+
+:: BUILD SCRIPTS FÜR HIGHWAY Windows <Ninja wird benötigt>
+:: Build.bat wichtig im root vom Highway Folder abspeichern
+:: cglm hat alles für windows vorbereitet du musst nichts mehr tun
+
+
+//END WINDOWS
+
+# BUILD SCRIPTS FÜR HIGHWAY LINUX
+# build_Highway.sh wichtig im root vom Highway Folder abspeichern
+# build_cglm.sh wichtig im root vom cglm Folder abspeichern
+
+# END LINUX

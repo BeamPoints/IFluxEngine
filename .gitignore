@@ -41,3 +41,4 @@
 *.dwo
 
 Thirdparty/cglm-0.9.6/*
+Thirdparty/highway-1.3.0/*

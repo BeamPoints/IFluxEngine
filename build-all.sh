@@ -2,8 +2,7 @@
 # Build script for rebuilding everything
 set echo on
 
-echo "Building everything..."
-
+echo "Building OWN CODE..."
 
 pushd Engine
 source build.sh
