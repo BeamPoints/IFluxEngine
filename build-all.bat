@@ -1,7 +1,7 @@
 @ECHO OFF
 REM Build OWN CODE
 
-ECHO "Building everything..."
+ECHO "Building Own Code..."
 
 PUSHD Engine
 CALL build.bat
