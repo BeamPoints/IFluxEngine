@@ -1,9 +1,9 @@
 cglm-0.9.6;
 google-Highway-1.3.0;
 
-:: BUILD SCRIPTS FÜR HIGHWAY Windows <Ninja wird benötigt>
-:: Build.bat wichtig im root vom Highway Folder abspeichern
-:: cglm hat alles für windows vorbereitet du musst nichts mehr tun
+:: BUILD SCRIPTS FÜR HIGHWAY Windows <Ninja wird benötigt> <MSBuild min 
+:: build_Highway.bat wichtig im root vom Highway Folder abspeichern
+:: build_cglm.bat wichtig im /cglm-0.9.6/win/ Folder abspeichern
 
 
 //END WINDOWS
