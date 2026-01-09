@@ -1,10 +1,10 @@
 #pragma once
-#include "defines.h"
+#include "Core/defines.h"
 
 typedef struct platform_state
 {
-    void* intenal_state;
-}
+    void* internal_state;
+}platform_state;
 
 b8 platformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
 
