@@ -6,11 +6,11 @@ typedef struct platform_state
     void* internal_state;
 }platform_state;
 
-b8 platformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
+FAPI b8 platformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
 
-void platformShutdown(platform_state* state);
+FAPI void platformShutdown(platform_state* state);
 
-b8 platform_pump_messages(platform_state* state);
+FAPI b8 platform_pump_messages(platform_state* state);
 
 void* platform_allocate(u64 size, b8 aligned);
 void  platform_free(void* ptr, b8 aligned);
@@ -50,4 +50,4 @@ f64 platform_get_absulute_time();
 // Sleep on the thread for the provided ms. This blocks the main Thread.
 // Should only be used for giving time back to the OS for unused update power.
 // Therefore it is not exported.
-void platform_sleep(u64 milliseconds);
+void platformSleep(u64 milliseconds);

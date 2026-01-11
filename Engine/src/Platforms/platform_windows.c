@@ -1,16 +1,21 @@
 #include "Platforms/platform.h"
 
 #if FPLATFORM_WINDOWS
+#include <Core/logger.h>
+
 #include <windows.h>
 #include <windowsx.h>
-
-#include <Core/logger.h>
+#include <stdlib.h>
 
 typedef struct internal_state
 {
     HINSTANCE h_instance;
     HWND hwnd;
 } internal_state;
+
+//clock
+static f64 clock_frequency;
+static LARGE_INTEGER startingTime; 
 
 LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM wparam, LPARAM lparam);
 
@@ -103,6 +108,12 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     // If initally maximized, use SW_MAXIMIZE : SW_SHOWMAXIMIZED;
     ShowWindow(Fullstate->hwnd,show_window_command_flags);
 
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+    clock_frequency = (f64)frequency.QuadPart;
+    QueryPerformanceCounter(&startingTime);
+
+
     return True;
 }
 
@@ -128,7 +139,129 @@ b8 platform_pump_messages(platform_state* state)
     return True;
 }
 
+void *platform_allocate(u64 size, b8 aligned)
+{
+    return malloc(size);
+}
 
+void platform_free(void *ptr, b8 aligned)
+{
+    free(ptr);
+}
 
+void *platform_zero_memory(void *ptr, u64 size)
+{
+    return memset(ptr,0,size);
+}
+
+void *platform_copy_memory(void *dest, const void *src, u64 size)
+{
+    return memcpy(dest,src,size);
+}
+
+void *platform_set_memory(void *dest, i32 value, u64 size)
+{
+    return memset(dest,value,size);
+}
+
+void platformConsoleWrite(const char *message, u8 colour)
+{
+    HANDLE console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    //FATAL,ERROR,WARNING,INFO,DEBUG,TRACE
+    static u8 levels[6] = {64,4,6,2,1,8};
+    SetConsoleTextAttribute(console_handle,levels[colour]);
+    OutputDebugStringA(message);
+    u64 length = strlen(message);
+    LPDWORD numbers_written = 0;
+    WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), message, (DWORD)length, numbers_written, 0);
+}
+
+void platformConsoleWriteError(const char *message, u8 colour)
+{
+    HANDLE console_handle = GetStdHandle(STD_ERROR_HANDLE);
+    //FATAL,ERROR,WARNING,INFO,DEBUG,TRACE
+    static u8 levels[6] = {64,4,6,2,1,8};
+    SetConsoleTextAttribute(console_handle,levels[colour]);
+    OutputDebugStringA(message);
+    u64 length = strlen(message);
+    LPDWORD numbers_written = 0;
+    WriteConsoleA(GetStdHandle(STD_ERROR_HANDLE), message, (DWORD)length, numbers_written, 0);
+}
+
+f64 platform_get_absulute_time()
+{
+    LARGE_INTEGER currentTime;
+    QueryPerformanceCounter(&currentTime);
+    return (f64)(currentTime.QuadPart * clock_frequency);
+}
+
+void platformSleep(u64 milliseconds)
+{
+    Sleep(milliseconds);
+}
+
+LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM wparam, LPARAM lparam)
+{
+    switch(msg)
+    {
+        case WM_ERASEBKGND:
+        {
+            return 1;
+        }
+        case WM_CLOSE:
+        {
+            // TODO: Fire Event to Quit Application 
+            return 0;
+        }
+        case WM_DESTROY:
+        {
+            PostQuitMessage(0);
+            return 0;
+        }
+        case WM_SIZE:
+        {
+           //RECT r; 
+           //GetClientRect(hwnd,&r);
+           //u32 width = r.right - r.left;
+           //u32 height = r.bottom - r.top;
+
+            // TODO: Fire Event to window resize
+        }break;
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+        {
+           //b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
+           //TODO: Fire Key Event
+        }break;
+        case WM_MOUSEMOVE:
+        {
+           //i32 x_position = GET_X_LPARAM(lparam);
+           //i32 y_position = GET_Y_LPARAM(lparam);
+            //TODO: INPUT Prozessing
+        }break;
+        case WM_MOUSEWHEEL:
+        {
+           // i32 wheel_delta = GET_WHEEL_DELTA_WPARAM(wparam);
+           // if(wheel_delta != 0)
+           // {
+           //     wheel_delta = (wheel_delta < 0) ? -1 : 1;
+           // }
+            // TODO: INPUT Prozessing
+        }break;
+        case WM_LBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
+        {
+            //b8 pressed = (msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN);
+            // TODO: INPUT Prozessing
+        }break; 
+    }
+    return DefWindowProcA(hwnd,msg,wparam,lparam);
+}
 
 #endif //FPLATFORM_WINDOWS
