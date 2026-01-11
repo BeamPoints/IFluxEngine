@@ -2,6 +2,16 @@ REM Build script for engine
 @ECHO OFF
 SetLocal EnableDelayedExpansion
 
+REM Build Windows Resource File
+ECHO "Building Resources..."
+SET RC_PATH="C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\rc.exe"
+pushd src\Platforms\Utility\
+:: Jetzt den Befehl mit dem vollen Pfad aufrufen
+%RC_PATH% /nologo /fo asset.res asset.rc
+popd
+ECHO "Copying Resources to Build Directory..."
+copy src\Platforms\Utility\asset.res ..\TestBench\asset.res
+
 REM Get a list of all the .c files.
 SET cFilenames=
 FOR /R %%f in (*.c) do (

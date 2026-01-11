@@ -37,6 +37,8 @@
 *.out
 *.app
 *.exp
+*.res
+*.ico
 
 # debug information files
 *.dwo

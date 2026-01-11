@@ -2,6 +2,7 @@
 
 #if FPLATFORM_WINDOWS
 #include <Core/logger.h>
+#include "Utility/assets.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -27,7 +28,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     Fullstate->h_instance = GetModuleHandleA(0);
 
     //WWWCR Weard Windows Window Class Registration
-    HICON icon = LoadIcon(Fullstate->h_instance,IDI_APPLICATION);
+    HICON icon = LoadIcon(Fullstate->h_instance, MAKEINTRESOURCE(IDI_FLUX_ICON));
     WNDCLASSA wc = {0};
     memset(&wc,0,sizeof(wc));
     wc.style = CS_DBLCLKS; //Get double clicks

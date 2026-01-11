@@ -1,0 +1,4 @@
+// assets.rc
+#include "assets.h"
+
+IDI_FLUX_ICON ICON "IFluxEngineIcon.ico"
