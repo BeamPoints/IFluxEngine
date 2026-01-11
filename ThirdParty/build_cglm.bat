@@ -1,7 +1,7 @@
 @echo off
 :: Lädt die MSVC-Tools (msbuild, cl, link)
 call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" >nul
-
+::FORCE WINDOWS TO BUILD WITH V143 Change it for other Versions
 echo Building cglm...
 msbuild cglm.vcxproj /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
 
