@@ -53,6 +53,11 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #elif defined(__linux__) || defined(__gnu_linux__)
 // Linux OS
 #define FPLATFORM_LINUX 1
+#if(getenv("WAYLAND_DISPLAY") == NULL)
+#define IFLUX_USE_X11 1
+#else
+#define IFLUX_USE_WAYLAND 1
+#endif
 #if defined(__ANDROID__)
 #define FPLATFORM_ANDROID 1
 #endif

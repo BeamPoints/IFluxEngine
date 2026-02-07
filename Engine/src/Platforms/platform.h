@@ -51,3 +51,13 @@ f64 platform_get_absulute_time();
 // Should only be used for giving time back to the OS for unused update power.
 // Therefore it is not exported.
 void platformSleep(u64 milliseconds);
+
+#ifdef IFLUX_USE_Wayland
+
+void SetWindowSize(i16 width, i16 height);
+i16 WithinRect(struct Rect rect, i16 x, i16 y);
+i16 ResizeSurfaceBuffer(struct SurfaceBuffer* buffer, struct wl_surface* surface); 
+i16 CreateSurfaceBuffer(struct SurfaceBuffer* buffer, struct wl_surface* surface, i8* name, u32 color);
+u32 ToColor(i8 r, i8 g, i8 b, i8 a);
+
+#endif

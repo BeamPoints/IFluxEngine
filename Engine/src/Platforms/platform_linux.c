@@ -1,25 +1,28 @@
+#pragma once 
 #include "Platforms/platform.h"
 
 #if FPLATFORM_LINUX
 
 #include <Core/logger.h>
-
-#include <xcb/xcb.h>
-#include <X11/keysym.h>
-#include <X11/KXBlib.h> // sudo apt-get install libx11-dev
-#include <X11/Xlib.h>
-#include <X11/Xlib-xcb.h> // sudo apt-get install libxkbcommon-x11-dev
-#include <sys/time>
-
 #if _POSIX_C_SOURCE >= 199309L
 #include <time.h> //nanosleep
 #else
 #include <unistd.h> //usleep
 #endif
 
+#include <sys/time>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>,
+
+// X11/XCB Code
+#ifdef IFLUX_USE_X11
+
+#include <xcb/xcb.h>
+#include <X11/keysym.h>
+#include <X11/KXBlib.h> // sudo apt-get install libx11-dev
+#include <X11/Xlib.h>
+#include <X11/Xlib-xcb.h> // sudo apt-get install libxkbcommon-x11-dev
 
 typedef struct internal_state
 {
@@ -36,7 +39,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     //Crate internal state
     state->internal_state = malloc(sizeof(internal_state));
     internal_state *Fullstate = (internal_state *)state->internal_state;
-
+    
     //Connect to X
     Fullstate->display = XOpenDisplay(NULL);
 
@@ -60,7 +63,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     }
     // After screens have been looped through, assing it.
     Fullstate->screen = it.data;
-
+    
     // Allocate a XID for the window to be created.
     Fullstate->window = xcb_gernerated_id(Fullstate->connection);
 
@@ -68,16 +71,16 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     // XCB_CW_BACK_PIXEL = filling the window bg with a single colour
     // XCB_CW_EVENT_MASK is required.
     u32 event_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-
+    
     //Listen for Keyboard and Mouse Buttons
     u32 event_values =  XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE |
                         XCB_EVENT_MASK_KEY_PRESS    | XCB_EVENT_MASK_KEY_RELEASE    |
                         XCB_EVENT_MASK_EXPOSURE     | XCB_EVENT_MASK_POINTER_MOTION |
                         XCB_EVENT_MASK_STRUCTURE_NOTIFY;
-    
-    // Values to be sent over XCB (bg colour , events)
-    u32 value_list[] = {Fullstate->screen->black_pixel, event_values};
-
+                        
+                        // Values to be sent over XCB (bg colour , events)
+                        u32 value_list[] = {Fullstate->screen->black_pixel, event_values};
+                        
     //Create window
     xcb_void_cookie_t cookie = xcb_create_window
     (
@@ -94,8 +97,8 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
         Fullstate->screen->root_visual,
         event_mask,
         value_list
-    );
-    //Change the Title
+        );
+        //Change the Title
     xcb_change_property
     (
         Fullstate->connection,
@@ -162,11 +165,11 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
         card_cookie,
         NULL
     );
-
+    
     Fullstate->wm_delete_win = wm_delete_reply->atom;
     Fullstate->wm_protocols = wm_protocols_reply->atom;
      xcb_change_property
-    (
+     (
         Fullstate->connection,
         XCB_PROP_MODE_REPLACE,
         Fullstate->window,
@@ -176,7 +179,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
         32,
         1
         &wm_delete_reply->atom
-    );
+        );
     //Set icon for Application
     uint32_t width = 32;
     uint32_t height = 32;
@@ -186,7 +189,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     uint32_t* icon_data = malloc(data_size * sizeof(uint32_t));
     icon_data[0] = width;
     icon_data[1] = height;
-
+    
     xcb_change_property(
     Fullstate->connection,
     XCB_PROP_MODE_REPLACE,
@@ -196,15 +199,15 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     32,                 // 32-bit Format
     data_size,          // Anzahl der Elemente (nicht Bytes!)
     icon_data
-    );
+);
 
     free(icon_data);
     free(icon_reply);
     free(card_reply);
-
+    
     //Map the window to the Screen
     xcb_map_window(Fullstate->connection, Fullstate->window);
-
+    
     //Flush the stream 
     i32 stream_result = xcb_flush(Fullstate->connection);
     if(stream_result <= 0)
@@ -219,19 +222,19 @@ void platformShutdown(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
-
+    
     // Turn on Key repeats back on since this is global for the OS... just... wow.
     XAutoRepeatOn(state->connection, state->window);
 }
 
 b8 platform_pump_messages(platform_state* state)
 {
-     // Simply cold-cast to the known Type.
+    // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
-
+    
     xcb_generic_event_t *event;
     xcb_client_message_t *cm;
-
+    
     b8 quit_flagged = False;
     //Poll for events until null is returned;
     while(event != 0)
@@ -257,7 +260,7 @@ b8 platform_pump_messages(platform_state* state)
             break;
             case XCB_CONFIGURE_NOTIFY: // REZIZING
             {
-
+                
             }
             case: XCB_CLIENT_MESSAGE:
             {
@@ -269,14 +272,153 @@ b8 platform_pump_messages(platform_state* state)
                 }
             }break;
             default:
-             //Something else
-             break;
+            //Something else
+            break;
         }
         free(event);
     }
-
+    
     return !quit_flagged;
 }
+#endif // XCB / X11 CODE END
+#ifdef IFLUX_USE_WAYLAND  // Wayland Code ///////////////////////////// WAYLAND CODE START /////////////////////////////////////////////////
+//WAYLAND INCLUDES
+#include <wayland-util.h>
+#include <wayland-client-core.h>
+#include <wayland-client-protocol.h>
+#include <wayland-client.h>
+#include <wayland-cursor.h>
+//#include <wayland-egl.h>
+
+#include <xdg-shell-client-protocol.h>
+// #include <xdg-decoration.h> DECORATION MANAGER
+
+#include <linux/input.h>
+#include <../Maths/math_engine.h> // normaly you use #include <math.h> but cglm is a header only math library that is faster than the one in the standard lib and has more features,
+                                   // also it is cross platform so it works on windows too. sudo apt-get install libcglm-dev #include <cglm/cglm.h>
+
+typedef struct internal_state
+{
+    wl_display *display;
+    wl_registry *registry;
+    wl_compositor *compositor;
+    wl_surface *surface;
+    wl_shell *shell;
+    wl_seat *seat;
+    uint32_t wm_delete_win;
+} internal_state;
+
+b8 platformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
+{
+    //Crate internal state
+    state->internal_state = malloc(sizeof(internal_state));
+    internal_state *Fullstate = (internal_state *)state->internal_state;
+    
+    //Wayland display Connection
+    Fullstate->display = wl_display_connect(NULL);
+    if (!Fullstate->display) 
+    {
+        FFATAL("Failed to connect to Wayland Server");
+        return False;
+    }
+    // Registry holen, um Interfaces (Compositor, Shell) zu finden
+    Fullstate->registry = wl_display_get_registry(Fullstate->display);
+    wl_registry_add_listener(Fullstate->registry, &registry_listener, Fullstate);
+
+    // Synchronisieren, damit die 'global' Callbacks ausgeführt werden
+    wl_display_roundtrip(Fullstate->display); // Called eigentlich wl_display_dispatch_queue(); 
+
+    // :TODO: DECORATION MANAGER
+
+    if (!Fullstate->compositor || !Fullstate->xdg_wm_base) 
+    {
+        FFATAL("Wayland: Required interfaces (compositor/xdg_shell) not found");
+        return False;
+    }
+    //Window Surface erstellen TopLevel
+    Fullstate->surface = wl_compositor_create_surface(Fullstate->compositor);
+
+    // XDG-Shell nutzen (ersetzt xcb_create_window)
+    Fullstate->xdg_surface = xdg_wm_base_get_xdg_surface(Fullstate->xdg_wm_base, Fullstate->surface);
+    xdg_surface_add_listener(Fullstate->xdg_surface, &xdg_surface_listener, Fullstate);
+
+    Fullstate->xdg_toplevel = xdg_surface_get_toplevel(Fullstate->xdg_surface);
+    xdg_toplevel_add_listener(Fullstate->xdg_toplevel, &xdg_toplevel_listener, Fullstate);
+
+    // Titel setzen (ersetzt xcb_change_property)
+    xdg_toplevel_set_title(Fullstate->xdg_toplevel, application_name);
+    xdg_toplevel_set_app_id(Fullstate->xdg_toplevel, application_name);
+
+    // 4. Den "Map"-Befehl abschicken
+    wl_surface_commit(Fullstate->surface);
+    wl_display_flush(Fullstate->display);
+
+}
+
+void platformShutdown(platform_state* state)
+{
+    // Simply cold-cast to the known Type.
+    internal_state *state = (internal_state)platform_state->internal_state;
+    Fullstate->quit_flagged = True;
+}
+
+b8 platform_pump_messages(platform_state* state)
+{
+    // Simply cold-cast to the known Type.
+    internal_state *state = (internal_state)platform_state->internal_state;
+    
+    xcb_generic_event_t *event;
+    xcb_client_message_t *cm;
+    
+    b8 quit_flagged = False;
+    //Poll for events until null is returned;
+    while(event != 0)
+    {
+        event = xcb_poll_for_event(state->connection); // THIS DONT WORK FOR WAYLAND, xcb_poll_for_event is for X11/XCB, for Wayland you need to use wl_display_dispatch or wl_display_dispatch_pending
+        if(event == 0)
+        {
+            break;
+        }
+        switch(event->response_type & -0x80)
+        {
+            case XCB_KEY_PRESS:
+            case XCB_KEY_RELEASE:
+            {
+                // TODO: KEY PRESS RELEASE EVENTS
+            }break;
+            case XCB_BUTTON_PRESSED:
+            case XCN_BUTTON_RELEASED:
+            {
+                // TODO: MOUSE BUTTON EVENTS
+            }
+            case XCB_MOTION_NOTIFY: // MOUSE MOVEMENT
+            break;
+            case XCB_CONFIGURE_NOTIFY: // REZIZING
+            {
+                
+            }
+            case: XCB_CLIENT_MESSAGE:
+            {
+                cm = (xcb_client_message_t*)event;
+                //window close
+                if(cm->data.data32[0] == state->wm_delete_win)
+                {
+                    quit_flagged = True;
+                }
+            }break;
+            default:
+            //Something else
+            break;
+        }
+        free(event);
+    }
+    
+    return !quit_flagged;
+}
+
+#endif // Wayland Code END ///////////////////////////// WAYLAND CODE END /////////////////////////////////////////////////
+
+
 void* platform_allocate(u64 size, b8 aligned)
 {
     return malloc(size)
