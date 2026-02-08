@@ -1,4 +1,3 @@
-#pragma once 
 #include "Platforms/platform.h"
 
 #if FPLATFORM_LINUX

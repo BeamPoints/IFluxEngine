@@ -6,19 +6,6 @@ typedef struct platform_state
     void* internal_state;
 }platform_state;
 
-void InitLinuxPlatform()
-{
-    if(getenv("WAYLAND_DISPLAY")) //do not work right getenv in preprocessor;
-    {
-        #define IFLUX_USE_WAYLAND 1 
-    }
-    else if(getenv("DISPLAY"))
-    {
-        #define IFLUX_USE_X11 1
-    }
-}
-
-
 b8 platformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
 
 void platformShutdown(platform_state* state);
@@ -65,6 +52,19 @@ f64 platform_get_absulute_time();
 // Therefore it is not exported.
 void platformSleep(u64 milliseconds);
 
+#ifdef FPLATFORM_LINUX
+void InitLinuxPlatform()
+{
+    if(getenv("WAYLAND_DISPLAY")) //do not work right getenv in preprocessor;
+    {
+        #define IFLUX_USE_WAYLAND 1 
+    }
+    else if(getenv("DISPLAY"))
+    {
+        #define IFLUX_USE_X11 1
+    }
+}
+#endif
 
 #ifdef IFLUX_USE_Wayland
 
