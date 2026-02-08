@@ -10,7 +10,6 @@
 #include <unistd.h> //usleep
 #endif
 
-#include <sys/time>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>,
@@ -285,12 +284,12 @@ b8 platform_pump_messages(platform_state* state)
 //WAYLAND INCLUDES
 #include <wayland-util.h>
 #include <wayland-client-core.h>
-#include <wayland-client-protocol.h>
+#include <wayland-client-protocol.h> // needs to AutoGenerate protocol files using wayland-scanner, see https://wayland.freedesktop.org/docs/html/wayland-scanner.html
 #include <wayland-client.h>
 #include <wayland-cursor.h>
 //#include <wayland-egl.h>
 
-#include <xdg-shell-client-protocol.h>
+#include <xdg-shell-client-protocol.h> // needs to AutoGenerate protocol files using wayland-scanner, see https://wayland.freedesktop.org/docs/html/wayland-scanner.html
 // #include <xdg-decoration.h> DECORATION MANAGER
 
 #include <linux/input.h>
