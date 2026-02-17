@@ -54,7 +54,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     const struct xcb_setup_t *setup = xcb_get_setup(Fullstate->connection);
     //Loop through screens using iterator
     xcb_screen_iterator_t it = xcb_setup_roots_iterator(setup);
-    int screen_p = 0;
+    i16 screen_p = 0;
     for (i32 s = screen_p; s > 0; s--)
     {
         xcb_screen_next(&it);

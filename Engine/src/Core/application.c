@@ -56,7 +56,7 @@ b8 application_create(game* game_inst)
         return False;
     }
 
-    if(!app_state.game_inst->initalize(app_state.game_inst))
+    if(!app_state.game_inst->initalize(game_inst))
     {
         FFATAL("Game Failed to initalize");
         return False;
@@ -83,9 +83,15 @@ b8 application_run()
             app_state.is_running = False;
             break;
         }
+        if(!app_state.game_inst->renderer(app_state.game_inst,(f32)0))
+        {
+            FFATAL("Game Render failed, shutting down");
+            app_state.is_running = False;
+            break;
+        }
     }
     app_state.is_running = False;
-    //platform_shutdown(&app_state.platform);
+    platformShutdown(&app_state.platform);
     return True;
     
 }

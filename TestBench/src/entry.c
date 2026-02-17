@@ -1,6 +1,8 @@
+#pragma once
 #include <entry.h>
 #include <Core/defines.h>
 #include "game.h"
+
 
 //defines the function to create a game
 b8 create_game(game* out_game)
@@ -17,6 +19,9 @@ b8 create_game(game* out_game)
     out_game->renderer = game_render;
     out_game->initalize = game_initalize;
     out_game->onresize = Game_on_resize;
+
+    //Create Game State
+    out_game->state = platform_allocate(sizeof(game_state),False);
 
     return True;
 }
