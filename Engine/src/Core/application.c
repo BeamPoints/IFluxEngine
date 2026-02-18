@@ -2,6 +2,7 @@
 #include "../game_types.h"
 #include "logger.h"
 #include "Platforms/platform.h"
+#include "Core/Memory/Fmemory.h"
 
 typedef struct application_state
 {
@@ -29,6 +30,7 @@ b8 application_create(game* game_inst)
 
     // INIT Subsystems
     initialize_logging();
+    
     // TODO: Remove this
     log_output(LOG_LEVEL_INFO, "INIT_Logging");
     FFATAL("This is a fatal error for testing purposes.");
@@ -41,7 +43,7 @@ b8 application_create(game* game_inst)
     app_state.is_running = True;
     app_state.is_suspended = False;
 
-    if(!platformStartup(
+    if(!PlatformStartup(
         &app_state.platform,
         game_inst->app_config.name, 
         game_inst->app_config.start_posX,
@@ -70,9 +72,10 @@ b8 application_create(game* game_inst)
 
 b8 application_run()
 {
+    FINFO(get_memory_usage_string());
     while (app_state.is_running)
     {
-        if(!platform_pump_messages(&app_state.platform))
+        if(!Platform_pump_messages(&app_state.platform))
         {
             app_state.is_running = False;
             break;
@@ -91,7 +94,7 @@ b8 application_run()
         }
     }
     app_state.is_running = False;
-    platformShutdown(&app_state.platform);
+    PlatformShutdown(&app_state.platform);
     return True;
     
 }

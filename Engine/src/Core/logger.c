@@ -44,11 +44,11 @@ void log_output(log_level level, const char* message, ...)
     // platform-specific output
     if (is_error)
     {
-        platformConsoleWriteError(out_message2, level);
+        PlatformConsoleWriteError(out_message2, level);
     }
     else
     {
-        platformConsoleWrite(out_message2, level);
+        PlatformConsoleWrite(out_message2, level);
     }
 }
 

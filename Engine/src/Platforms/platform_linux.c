@@ -32,7 +32,7 @@ typedef struct internal_state
     xcb_atom_t wm_delete_window;
 } internal_state;
 
-b8 platformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
+b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
 {
     //Crate internal state
     state->internal_state = malloc(sizeof(internal_state));
@@ -216,7 +216,7 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
     return True;
 }
 
-void platformShutdown(platform_state* state)
+void PlatformShutdown(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
@@ -225,7 +225,7 @@ void platformShutdown(platform_state* state)
     XAutoRepeatOn(state->connection, state->window);
 }
 
-b8 platform_pump_messages(platform_state* state)
+b8 Platform_pump_messages(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
@@ -306,7 +306,7 @@ typedef struct internal_state
     uint32_t wm_delete_win;
 } internal_state;
 
-b8 platformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
+b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
 {
     //Crate internal state
     state->internal_state = malloc(sizeof(internal_state));
@@ -353,14 +353,14 @@ b8 platformStartup(platform_state* state, const char* application_name, i32 x, i
 
 }
 
-void platformShutdown(platform_state* state)
+void PlatformShutdown(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
     Fullstate->quit_flagged = True;
 }
 
-b8 platform_pump_messages(platform_state* state)
+b8 Platform_pump_messages(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
@@ -417,17 +417,17 @@ b8 platform_pump_messages(platform_state* state)
 #endif // Wayland Code END ///////////////////////////// WAYLAND CODE END /////////////////////////////////////////////////
 
 
-void* platform_allocate(u64 size, b8 aligned)
+void* Platform_allocate(u64 size, b8 aligned)
 {
     return malloc(size)
 }
 
-void platform_free(void* block, b8 aligned)
+void Platform_free(void* block, b8 aligned)
 {
     free(block);
 }
 
-void* platform_zero_memory(void* block, u64 size)
+void* Platform_zero_memory(void* block, u64 size)
 {
     return memset(block,0,size);
 }
@@ -455,7 +455,7 @@ void platform_console_write_error(const char* message, u8 colour)
     printf("\033[%sm%s[0m",colour_string[colour],message);
 }
 
-f64 platform_get_absulute_time()
+f64 Platform_get_absulute_time()
 {
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);

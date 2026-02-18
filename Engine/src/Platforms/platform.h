@@ -6,15 +6,15 @@ typedef struct platform_state
     void* internal_state;
 }platform_state;
 
-b8 platformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
+b8 PlatformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
 
-void platformShutdown(platform_state* state);
+void PlatformShutdown(platform_state* state);
 
-b8 platform_pump_messages(platform_state* state);
+b8 Platform_pump_messages(platform_state* state);
 
-FAPI void* platform_allocate(u64 size, b8 aligned);
-FAPI void  platform_free(void* ptr, b8 aligned);
-void* platform_zero_memory(void* block, u64 size);
+FAPI void* Platform_allocate(u64 size, b8 aligned);
+void  Platform_free(void* ptr, b8 aligned);
+void* PlatformZeroMemory(void* block, u64 size);
 
 void* PlatformCopyMemory(void* dest, const void* source, u64 size);
 /*
@@ -25,7 +25,7 @@ void* PlatformCopyMemory(void* dest, const void* source, u64 size);
 }
 */
 
-void*platformSetMemory(void* dest, i32 value, u64 size); 
+void* PlatformSetMemory(void* dest, i32 value, u64 size); 
 /*
 {
     // Clang ist schlau genug, dies zu optimieren, 
@@ -42,15 +42,15 @@ void PlatformCopyAligned(void* __restrict dest, const void* __restrict source, u
 }
 */
 
-void platformConsoleWrite(const char* message,u8 colour);
-void platformConsoleWriteError(const char* message,u8 colour);
+void PlatformConsoleWrite(const char* message,u8 colour);
+void PlatformConsoleWriteError(const char* message,u8 colour);
 
-f64 platform_get_absulute_time();
+f64 Platform_get_absulute_time();
 
 // Sleep on the thread for the provided ms. This blocks the main Thread.
 // Should only be used for giving time back to the OS for unused update power.
 // Therefore it is not exported.
-void platformSleep(u64 milliseconds);
+void PlatformSleep(u64 milliseconds);
 
 #ifdef FPLATFORM_LINUX
 void InitLinuxPlatform()

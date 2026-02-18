@@ -1,7 +1,7 @@
-#pragma once
+#include <Core/Memory/Fmemory.h>
 #include <entry.h>
-#include <Core/defines.h>
 #include "game.h"
+#include <Core/defines.h>
 
 
 //defines the function to create a game
@@ -21,7 +21,7 @@ b8 create_game(game* out_game)
     out_game->onresize = Game_on_resize;
 
     //Create Game State
-    out_game->state = platform_allocate(sizeof(game_state),False);
+    out_game->state = fallocate(sizeof(game_state),False, MEMORY_TAG_GAME);
 
     return True;
 }
