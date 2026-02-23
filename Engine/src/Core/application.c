@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "Platforms/platform.h"
 #include "Core/Memory/Fmemory.h"
+#include "Core/input.h"
 
 typedef struct application_state
 {
@@ -30,6 +31,7 @@ b8 application_create(game* game_inst)
 
     // INIT Subsystems
     initialize_logging();
+    initialize_input();
     
     // TODO: Remove this
     log_output(LOG_LEVEL_INFO, "INIT_Logging");
@@ -92,6 +94,9 @@ b8 application_run()
             app_state.is_running = False;
             break;
         }
+        // NOTE: INPUT IS UPDATE IS LAST INSTANCE INFRONT OF NEW IMAGE;
+        //DONT TAKE EFFECT ANYTHING SHOUD BE SAVER THAN WHILE DRAWING IMAGE;
+        update_input(0);
     }
     app_state.is_running = False;
     PlatformShutdown(&app_state.platform);
