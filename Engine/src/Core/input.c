@@ -67,7 +67,7 @@ void input_process_key(keys key, b8 pressed)
     }
 }
 
-void input_proceess_button(buttons button, b8 pressed)
+void input_process_button(buttons button, b8 pressed)
 {
     if(state.mouse_current.buttons[button] != pressed)
     {
@@ -85,7 +85,7 @@ void input_process_mouse_move(i16 x, i16 y)
     if(state.mouse_current.x != x || state.mouse_current.y != y)
     {
         // NOTE: Enable this for DEBUG
-        //FDEBUG("Mouse pos: %i, %i!", x, y);
+        // FDEBUG("Mouse pos: %i, %i!", x, y);
         
         //UPDATE internal State;
         state.mouse_current.x = x;

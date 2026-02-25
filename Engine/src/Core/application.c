@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "Platforms/platform.h"
 #include "Core/Memory/Fmemory.h"
+#include "Core/Events/event.h"
 #include "Core/input.h"
 
 typedef struct application_state
@@ -18,6 +19,10 @@ typedef struct application_state
 
 static b8 initalized = False;
 static application_state app_state;
+
+//Event Handlers
+b8 application_on_event(u16 code, void* sender, void* listner_inst, event_context context);
+b8 application_on_key(u16 code, void* sender, void* listner_inst, event_context context);
 
 b8 application_create(game* game_inst)
 {
@@ -44,6 +49,16 @@ b8 application_create(game* game_inst)
 
     app_state.is_running = True;
     app_state.is_suspended = False;
+
+    if(!event_initialize())
+    {
+        FERROR("EVENT_SYSTEM Failed to Initialization. Application cannot Continue.");
+        return False;
+    }
+
+    event_register(EVENT_CODE_APPLICATION_QUIT, 0, application_on_event);
+    event_register(EVENT_CODE_KEYPRESSED, 0 , application_on_key);
+    event_register(EVENT_CODE_KEYRELEASED, 0 , application_on_key);
 
     if(!PlatformStartup(
         &app_state.platform,
@@ -99,7 +114,64 @@ b8 application_run()
         update_input(0);
     }
     app_state.is_running = False;
+    event_unregister(EVENT_CODE_APPLICATION_QUIT,0,application_on_event);
+    event_unregister(EVENT_CODE_KEYPRESSED, 0 , application_on_key);
+    event_unregister(EVENT_CODE_KEYRELEASED, 0 , application_on_key);
+    shutdown_event();
+    shutdown_input();
+
     PlatformShutdown(&app_state.platform);
     return True;
     
+}
+
+b8 application_on_event(u16 code, void* sender, void* listner_inst, event_context context)
+{
+    switch(code)
+    {
+        case EVENT_CODE_APPLICATION_QUIT:
+        {
+            FINFO("EVENT_CODE_APPLICATION_QUIT recieved, shutting down.\n");
+            app_state.is_running = False;
+            return True;
+        }
+    }
+    return False;
+}
+
+b8 application_on_key(u16 code, void* sender, void* listner_inst, event_context context)
+{
+    if(code == EVENT_CODE_KEYPRESSED)
+    {
+        u16 key_code = context.data.u16[0];
+        if(key_code == KEY_ESCAPE)
+        {
+            //NOTE: Technically firing an event to itself, but there may be other listeners.
+            event_context data = {};
+            event_fire(EVENT_CODE_APPLICATION_QUIT , 0 , data);
+            //Block anything Else for Processing
+            return True;
+        } 
+        else if (key_code == KEY_A)
+        {
+            FDEBUG("EXPLICIT - A_KEY is PRESSED");
+        }
+        else
+        {
+            FDEBUG("'%c' key Pressed in Window", key_code);
+        }
+    }
+    else if( code == EVENT_CODE_KEYRELEASED)
+    {
+        u16 key_code = context.data.i16[0];
+        if(key_code == KEY_B)
+        {
+            FDEBUG("EXPLICIT - B Key is Released");
+        }
+        else
+        {
+            FDEBUG("'%c' key released in window", key_code);
+        }
+    }
+    return False;
 }

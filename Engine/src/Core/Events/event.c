@@ -40,7 +40,7 @@ b8 event_initialize()
     return True;
 }
 
-void event_shutdown()
+void shutdown_event()
 {
     //Free the Events array. And Object Pointed to should be destroyed on their own.
     for(u16 i = 0; i < MAX_EVENTCODE; i++)

@@ -1,8 +1,9 @@
 #include "Platforms/platform.h"
 
 #if FPLATFORM_WINDOWS
-#include <Core/logger.h>
+#include "Core/logger.h"
 #include "Utility/assets.h"
+#include "Core/input.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -18,7 +19,7 @@ typedef struct internal_state
 static f64 clock_frequency;
 static LARGE_INTEGER startingTime; 
 
-LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM wparam, LPARAM lparam);
+LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param);
 
 b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
 {
@@ -201,7 +202,7 @@ void PlatformSleep(u64 milliseconds)
     Sleep(milliseconds);
 }
 
-LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param)
 {
     switch(msg)
     {
@@ -233,23 +234,29 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM wparam, LPARAM
         case WM_KEYUP:
         case WM_SYSKEYUP:
         {
-           //b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
-           //TODO: Fire Key Event
-        }break;
+           //KEY Pressed / Released
+           b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
+           keys key = (u16)w_param;
+           //Pass it to the Input SubSystem for Processing;
+           input_process_key(key, pressed);
+        } break;
         case WM_MOUSEMOVE:
         {
-           //i32 x_position = GET_X_LPARAM(lparam);
-           //i32 y_position = GET_Y_LPARAM(lparam);
-            //TODO: INPUT Prozessing
+           i32 x_position = GET_X_LPARAM(l_param);
+           i32 y_position = GET_Y_LPARAM(l_param);
+           //Pass it to the Input SubSystem for Processing;
+           input_process_mouse_move(x_position,y_position); 
         }break;
         case WM_MOUSEWHEEL:
         {
-           // i32 wheel_delta = GET_WHEEL_DELTA_WPARAM(wparam);
-           // if(wheel_delta != 0)
-           // {
-           //     wheel_delta = (wheel_delta < 0) ? -1 : 1;
-           // }
-            // TODO: INPUT Prozessing
+           i32 wheel_delta = GET_WHEEL_DELTA_WPARAM(w_param);
+           if(wheel_delta != 0)
+           {
+               wheel_delta = (wheel_delta < 0) ? -1 : 1;
+               //Pass it to the Input SubSystem for Processing;
+               input_process_mouse_wheel(wheel_delta); 
+           }
+           //else do nothing
         }break;
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
@@ -258,11 +265,31 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM wparam, LPARAM
         case WM_MBUTTONUP:
         case WM_RBUTTONUP:
         {
-            //b8 pressed = (msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN);
-            // TODO: INPUT Prozessing
-        }break; 
+            b8 pressed = msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN;
+            buttons mouse_button = BUTTON_MAX_BUTTONS;
+            switch(msg)
+            {
+                case WM_LBUTTONDOWN:
+                case WM_LBUTTONUP:
+                    mouse_button = BUTTON_LEFT;
+                    break;
+                case WM_MBUTTONDOWN:
+                case WM_MBUTTONUP:
+                    mouse_button = BUTTON_MIDDLE;
+                    break;
+                case WM_RBUTTONDOWN:
+                case WM_RBUTTONUP:
+                    mouse_button = BUTTON_RIGHT;
+                    break;
+            }
+            //Pass it to the Input SubSystem for Processing;
+            if(mouse_button != BUTTON_MAX_BUTTONS)
+            {
+                input_process_button(mouse_button, pressed);
+            }
+        }break;     
     }
-    return DefWindowProcA(hwnd,msg,wparam,lparam);
+    return DefWindowProcA(hwnd,msg,w_param,l_param);
 }
 
 #endif //FPLATFORM_WINDOWS
