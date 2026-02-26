@@ -1,8 +1,8 @@
 #include "Core/Memory/Fmemory.h"
 #include "Platforms/platform.h"
+#include "Core/fstring.h"
 
 #include "Core/logger.h"
-#include "string.h" // TEMP;
 
 struct memory_stats
 {
@@ -121,6 +121,6 @@ char* get_memory_usage_string()
         i32 length = snprintf(buffer + offset, sizeof(buffer) - offset, "%s: %.4f %s\n", memory_tag_strings[i], ammout, unit);
         offset += length;
     }
-    char* out_string = _strdup(buffer);
+    char* out_string = string_duplicate(buffer);
     return out_string;
 }
