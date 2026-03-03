@@ -220,7 +220,7 @@ b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i
     return True;
 }
 
-void PlatformShutdown(platform_state* state)
+void ShutdownPlatform(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;
@@ -393,7 +393,7 @@ b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i
 
 }
 
-void PlatformShutdown(platform_state* state)
+void ShutdownPlatform(platform_state* state)
 {
     // Simply cold-cast to the known Type.
     internal_state *state = (internal_state)platform_state->internal_state;

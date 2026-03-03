@@ -13,7 +13,7 @@ typedef struct game
     // Function Pointer to Game Update Function
     b8 (*update)(struct game* game_inst, f32 delta_time);
     // Function pointer to Game`s Renderer Function
-    b8 (*renderer)(struct game* game_inst, f32 delta_time);
+    b8 (*rendering)(struct game* game_inst, f32 delta_time);
     // Function Pointer to handle Resize, if Applicable;
     void (*onresize)(struct game* game_inst, u32 width, u32 height);
     // Game-Specific game State. Crated and managed by the Game;

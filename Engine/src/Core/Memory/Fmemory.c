@@ -42,7 +42,7 @@ void shutdown_memory()
     FINFO("Total Allocated Memory: %llu bytes", stats.total_allocated);
 }
 
-void* fallocate(u64 size, b8 aligned, memoryTag tag)
+void* fallocate(u64 size, memoryTag tag)
 {
    if(tag == MEMORY_TAG_UNKOWN)
    {

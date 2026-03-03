@@ -16,12 +16,12 @@ b8 create_game(game* out_game)
 
     out_game->app_config = config;
     out_game->update = game_update;
-    out_game->renderer = game_render;
+    out_game->rendering = game_render;
     out_game->initalize = game_initalize;
     out_game->onresize = Game_on_resize;
 
     //Create Game State
-    out_game->state = fallocate(sizeof(game_state),False, MEMORY_TAG_GAME);
+    out_game->state = fallocate(sizeof(game_state), MEMORY_TAG_GAME);
 
     return True;
 }

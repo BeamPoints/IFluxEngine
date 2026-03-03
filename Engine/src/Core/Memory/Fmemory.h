@@ -15,7 +15,7 @@ typedef enum memoryTag
     MEMORY_TAG_JOB,
     MEMORY_TAG_TEXTURE,
     MEMORY_TAG_MATERIAL_INSTANCE,
-    MEMORY_TAG_REDERER,
+    MEMORY_TAG_REDERING,
     MEMORY_TAG_GAME,
     MEMORY_TAG_TRANSFORM,
     MEMORY_TAG_ENTITY,
@@ -27,7 +27,7 @@ typedef enum memoryTag
 FAPI void initialize_memory();
 FAPI void shutdown_memory();
 
-FAPI void* fallocate(u64 size, b8 aligned, memoryTag tag);
+FAPI void* fallocate(u64 size, memoryTag tag);
 FAPI void ffree(void* block, u64 size, memoryTag tag);
 FAPI void* fzero_memory(void* block, u64 size);
 FAPI void* fcopy_memory(void* dest, const void* source, u64 size);

@@ -8,7 +8,7 @@ typedef struct platform_state
 
 b8 PlatformStartup(platform_state* state,const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen);
 
-void PlatformShutdown(platform_state* state);
+void ShutdownPlatform(platform_state* state);
 
 b8 Platform_pump_messages(platform_state* state);
 

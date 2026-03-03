@@ -21,7 +21,7 @@ int main(void)
         return -1;
     }
     //Ensure the function pointer exist;
-    if(!game_inst.renderer || !game_inst.update || !game_inst.initalize || !game_inst.onresize)
+    if(!game_inst.rendering || !game_inst.update || !game_inst.initalize || !game_inst.onresize)
     {
         FFATAL("The Game's function pointers must be assinged");
         return -2;

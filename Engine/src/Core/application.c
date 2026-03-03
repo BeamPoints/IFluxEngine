@@ -5,6 +5,9 @@
 #include "Core/Memory/Fmemory.h"
 #include "Core/Events/event.h"
 #include "Core/InputTypes/input.h"
+#include "Core/clock.h"
+
+#include "Core/Rendering/FrontEnd/Rendering_Frontend.h"
 
 typedef struct application_state
 {
@@ -14,6 +17,7 @@ typedef struct application_state
     platform_state platform;
     i16 width;
     i16 height;
+    clock clock;
     f64 last_time;
 }application_state;
 
@@ -75,6 +79,14 @@ b8 application_create(game* game_inst)
         return False;
     }
 
+    //Rendering INIT;
+    if(!initialize_rendering(game_inst->app_config.name, &app_state.platform))
+    {
+        FFATAL("Rendering Failed to initalize");
+        return False;
+    }
+
+    //Game INIT;
     if(!app_state.game_inst->initalize(game_inst))
     {
         FFATAL("Game Failed to initalize");
@@ -89,7 +101,17 @@ b8 application_create(game* game_inst)
 
 b8 application_run()
 {
+    start_clock(&app_state.clock);
+    update_clock(&app_state.clock);
+
+    app_state.last_time = app_state.clock.elapsed;
+
+    f64 running_time = 0;
+    u8 frame_count = 0;
+    f64 target_frame_seconds = 1.0f / 60;
+
     FINFO(get_memory_usage_string());
+
     while (app_state.is_running)
     {
         if(!Platform_pump_messages(&app_state.platform))
@@ -97,21 +119,51 @@ b8 application_run()
             app_state.is_running = False;
             break;
         }
-        if(!app_state.game_inst->update(app_state.game_inst, (f32)0))
+        if(!app_state.is_suspended)
         {
-            FFATAL("Game Update failed, shutting down");
-            app_state.is_running = False;
-            break;
+            //UPDATE CLOCK AND GET DELTA TIME
+            update_clock(&app_state.clock);
+            f64 current_time = app_state.clock.elapsed;
+            f64 delta = (current_time - app_state.last_time);
+            f64 frame_start_time = Platform_get_absulute_time();
+
+            if(!app_state.game_inst->update(app_state.game_inst, (f32)delta))
+            {
+                FFATAL("Game Update failed, shutting down");
+                app_state.is_running = False;
+                break;
+            }
+            if(!app_state.game_inst->rendering(app_state.game_inst,(f32)delta))
+            {
+                FFATAL("Game Render failed, shutting down");
+                app_state.is_running = False;
+                break;
+            }
+
+            rendering_packet packet;
+            packet.delta_time = delta;
+            rendering_draw_frame(&packet);
+
+            // NOTE: INPUT IS UPDATE IS LAST INSTANCE INFRONT OF NEW IMAGE;
+            //DONT TAKE EFFECT ANYTHING SHOUD BE SAVER THAN WHILE DRAWING IMAGE;
+            f64 frame_end_time = Platform_get_absulute_time();
+            f64 frame_elapsed_time = frame_end_time - frame_start_time;
+            running_time += frame_elapsed_time;
+            f64 remaining_secs = target_frame_seconds - frame_elapsed_time;
+            if(remaining_secs > 0)
+            {
+                u64 remaining_ms = (remaining_secs);
+                b8 limit_frames = False;
+                if(remaining_ms > 0 && limit_frames)
+                {
+                    PlatformSleep(remaining_ms - 1);
+                }
+                frame_count++;
+            }
+            update_input(delta);
+
+            app_state.last_time = current_time;
         }
-        if(!app_state.game_inst->renderer(app_state.game_inst,(f32)0))
-        {
-            FFATAL("Game Render failed, shutting down");
-            app_state.is_running = False;
-            break;
-        }
-        // NOTE: INPUT IS UPDATE IS LAST INSTANCE INFRONT OF NEW IMAGE;
-        //DONT TAKE EFFECT ANYTHING SHOUD BE SAVER THAN WHILE DRAWING IMAGE;
-        update_input(0);
     }
     app_state.is_running = False;
     event_unregister(EVENT_CODE_APPLICATION_QUIT,0,application_on_event);
@@ -120,7 +172,9 @@ b8 application_run()
     shutdown_event();
     shutdown_input();
 
-    PlatformShutdown(&app_state.platform);
+    shutdown_rendering();
+
+    ShutdownPlatform(&app_state.platform);
     return True;
     
 }
