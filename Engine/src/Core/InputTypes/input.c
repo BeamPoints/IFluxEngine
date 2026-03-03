@@ -1,4 +1,4 @@
-#include "Core/input.h"
+#include "Core/InputTypes/input.h"
 #include "Core/Events/event.h"
 #include "Core/Memory/Fmemory.h"
 #include "Core/logger.h"

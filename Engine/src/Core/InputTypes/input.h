@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defines.h"
+#include "Core/defines.h"
 
 typedef enum buttons
 {

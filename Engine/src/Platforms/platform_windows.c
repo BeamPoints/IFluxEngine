@@ -3,7 +3,8 @@
 #if FPLATFORM_WINDOWS
 #include "Core/logger.h"
 #include "Utility/assets.h"
-#include "Core/input.h"
+#include "Core/InputTypes/input.h"
+#include "Core/defines.h"
 
 #include <windows.h>
 #include <windowsx.h>

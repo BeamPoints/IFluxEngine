@@ -1,5 +1,5 @@
 #include "Platforms/platform.h"
-#include "Core/input.h"
+#include "Core/InputTypes/input.h"
 #include "Core/Events/event.h"
 #include "Core/logger.h"
 

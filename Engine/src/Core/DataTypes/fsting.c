@@ -1,4 +1,4 @@
-#include "Core/fstring.h"
+#include "Core/DataTypes/fstring.h"
 #include "Core/Memory/Fmemory.h"
 
 char* string_duplicate(const char* str)

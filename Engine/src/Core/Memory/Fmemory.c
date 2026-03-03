@@ -1,6 +1,6 @@
 #include "Core/Memory/Fmemory.h"
 #include "Platforms/platform.h"
-#include "Core/fstring.h"
+#include "Core/DataTypes/fstring.h"
 
 #include "Core/logger.h"
 
