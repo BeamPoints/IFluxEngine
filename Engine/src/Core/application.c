@@ -174,8 +174,6 @@ b8 application_run()
     shutdown_event();
     shutdown_input();
 
-    shutdown_rendering();
-
     ShutdownPlatform(&app_state.platform);
     return True;
     

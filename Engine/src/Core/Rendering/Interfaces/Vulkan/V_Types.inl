@@ -19,3 +19,11 @@ typedef struct vulkan_context
     VkDebugUtilsMessengerEXT debug_messenger;
 #endif
 }vulkan_context;
+
+typedef struct vulkan_ext_layers
+{
+    u64 extension_names;
+    u32 extension_count;
+    u64 layer_names;
+    u32 layer_count;
+}vulkan_ext_layers;

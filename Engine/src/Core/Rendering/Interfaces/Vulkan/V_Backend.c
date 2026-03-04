@@ -9,6 +9,7 @@
 
 // static Vulkan context
 static vulkan_context context;
+static vulkan_ext_layers ext_layers;
 
 //DEBUG CONSOLE DEBUG
 VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messenge_Level,
@@ -34,10 +35,12 @@ b8 initalize_vulkan_backend(rendering_backend* backend, const char* application_
     //Validation Layers.
     const char** required_validation_layer_names = 0;
     u32 required_validation_layer_count = 0;
+    u64 valid_layer_names = 0;
+    u32 valid_layer_count = 0;
 
     //If Validation should be done, get list of the required validation Layer Names
     //and make sure they exist. Shoud be only done with DEBUG Mode // NO RELEASE contain them.
-#if defined(_DEBUG)
+
     FINFO("VALIDATION LAYERS ENABELED. Start Enumerating ....");
 
     //The list of validation layers required;
@@ -62,7 +65,8 @@ b8 initalize_vulkan_backend(rendering_backend* backend, const char* application_
             if(strings_equal(required_validation_layer_names[i],available_layers[j].layerName))
             {
                 found = True;
-                FDEBUG("Found Layer");
+                FDEBUG("Found Layer Named : %s", required_validation_layer_names[i] );
+                valid_layer_names = ExtManager(valid_layer_names, required_validation_layer_names[i], ++valid_layer_count, False);
                 break;
             }
         }
@@ -73,37 +77,82 @@ b8 initalize_vulkan_backend(rendering_backend* backend, const char* application_
         }
     }
     FDEBUG("All Required Validation Layers are Present.");
-    FDEBUG("REQ VALID LAYER COUNT %u",required_validation_layer_count);
-    for(u32 g = 0; g < darray_length(required_validation_layer_names); g++)
-    {
-        FDEBUG("REQ VALID LAYER NAMES %s",required_validation_layer_names[g])
-    }
-#endif
 
-    create_info.enabledLayerCount = darray_length(required_validation_layer_names);
-    create_info.ppEnabledLayerNames = required_validation_layer_names;
+    required_validation_layer_count = 0;
+    darray_destroy(required_validation_layer_names);
+    // SAVING LayerNames on Struct to CleanUp Later;
+    ext_layers.layer_names = valid_layer_names;
+    ext_layers.layer_count = valid_layer_count;
+    // Casting Pointer to ppEnabledLayerNames to give it vulkan
+    create_info.enabledLayerCount = valid_layer_count;
+    create_info.ppEnabledLayerNames = (const char* const*)valid_layer_names;
+    //END OF LAYERS
 
+    //START OF EXTENSIONS
     // Obtain a list of required extensions
+    u64 valid_extension_names = 0;
+    u32 valid_extension_count = 0;
+    valid_extension_names = ExtManager(valid_extension_names, VK_KHR_SURFACE_EXTENSION_NAME             , ++valid_extension_count, False);
+    valid_extension_names = ExtManager(valid_extension_names, get_required_platform_extension_names()   , ++valid_extension_count, False);
+    valid_extension_names = ExtManager(valid_extension_names, VK_EXT_DEBUG_UTILS_EXTENSION_NAME         , ++valid_extension_count, False);
+    /*
+    */
+
+/*          DONT WORK BECAUSE I LOSE SOMEWHERE MY MEMORY :(
 	u32 required_extension_count = 0;
-	u64 required_extensions = ExtManager(0, VK_KHR_SURFACE_EXTENSION_NAME, ++required_extension_count, False);                              // Generic surface extension
-	required_extensions = ExtManager(required_extensions, get_required_platform_extension_names(), ++required_extension_count, False);      // Platform-specific extension(s)
-#if defined(_DEBUG)
-	required_extensions = ExtManager(required_extensions, VK_EXT_DEBUG_UTILS_EXTENSION_NAME, ++required_extension_count, False);           // debug utilities
+	const char** required_extensions = darray_create(const char*);
+	darray_push(required_extensions, &VK_KHR_SURFACE_EXTENSION_NAME);	        // Generic surface extension
+	darray_push(required_extensions, get_required_platform_extension_names());   // Platform-specific extension(s)
+    darray_push(required_extensions, &VK_EXT_DEBUG_UTILS_EXTENSION_NAME);       // debug utilities
+    
+    FDEBUG("Required extensions:");
+	required_extension_count = darray_length(required_extensions);
+	for (u32 i = 0; i < required_extension_count; ++i) {
+        FDEBUG(required_extensions[i]);
+        valid_extension_names = ExtManager(valid_extension_names, required_extensions[i] , ++valid_extension_count, False); 
+        }
+        
+u32 available_extension_count = 0;
+vkEnumerateInstanceExtensionProperties(0, &available_extension_count, 0);
+VkExtensionProperties* available_extensions = darray_reserve(VkExtensionProperties, available_extension_count);
+vkEnumerateInstanceExtensionProperties(0, &available_extension_count, available_extensions);
+darray_length_set(available_layers, availible_layer_count);
 
-	FDEBUG("Required extensions:");
-    const char** debug_ptr = (const char**)required_extensions;
-	for (u32 i = 0; i < required_extension_count; ++i) 
-    {
-		FDEBUG("%s" ,debug_ptr[i]);
-	}
+// Verify required extensions are available.
+for (u32 i = 0; i < required_extension_count; ++i) {
+    b8 found = False;
+    for (u32 j = 0; j < available_extension_count; ++j) {
+        if (strings_equal(required_extensions[i], available_extensions[j].extensionName)) {
+            found = True;
+            FINFO("Required exension found: %s...", required_extensions[i]);
+            valid_extension_names = ExtManager(valid_extension_names, required_extensions[i] , ++valid_extension_count, False); 
+            break;
+        }
+    }
+    if (!found) {
+        FFATAL("Required extension is missing: %s", required_extensions[i]);
+        return False;
+    }
+}
 
-#endif
+FDEBUG("All Required extensions Found");
+darray_destroy(available_extensions);
+darray_destroy(required_extensions);
+*/
 
-	create_info.enabledExtensionCount = required_extension_count;
-	create_info.ppEnabledExtensionNames = (const char* const*)required_extensions;
 
-    VK_CHECK(vkCreateInstance(&create_info, context.allocator, &context.instance));
-    FINFO("Vulkan Instance Created");
+// SAVING ExtensionNames on Struct to CleanUp Later;
+ext_layers.extension_names = valid_extension_names;
+ext_layers.extension_count = valid_extension_count;
+
+// Casting Pointer to ppEnabledExtensionNames to give it vulkan
+create_info.enabledExtensionCount = valid_extension_count;
+create_info.ppEnabledExtensionNames = (const char* const*)valid_extension_names;
+
+VK_CHECK(vkCreateInstance(&create_info, context.allocator, &context.instance));
+FINFO("Vulkan Instance Created");
+
+    darray_destroy(available_layers);
 
 #if defined(_DEBUG)
     u32 log_Level = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT; // | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT ; // | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
@@ -143,7 +192,8 @@ void shutdown_vulkan_backend(rendering_backend* backend)
     FDEBUG("DESTROYING DEBUGGER");
     if(context.debug_messenger)
     {
-        PFN_vkDestroyDebugUtilsMessengerEXT func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(context.instance, "vkCreateDebugUtilsMessengerEXT");
+        // ÄNDERE DIESE ZEILE:
+        PFN_vkDestroyDebugUtilsMessengerEXT func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(context.instance, "vkDestroyDebugUtilsMessengerEXT");
         if(context.allocator && func != NULL)
         {
             func(context.instance, context.debug_messenger, context.allocator);
@@ -160,6 +210,8 @@ void shutdown_vulkan_backend(rendering_backend* backend)
     }
     FDEBUG("DESTROYING Vulkan Instance");
     vkDestroyInstance(context.instance,context.allocator);
+    ExtManager(ext_layers.layer_names, 0, ext_layers.extension_count, True);
+    ExtManager(ext_layers.extension_names, 0, ext_layers.extension_count, True);
 }
 
 const u64 ExtManager(u64 address, const char* add, u16 newsize, u8 del)
