@@ -203,6 +203,11 @@ void PlatformSleep(u64 milliseconds)
     Sleep(milliseconds);
 }
 
+const char* get_required_platform_extension_names()
+{
+    return "VK_KHR_win32_surface";
+}
+
 LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param)
 {
     switch(msg)

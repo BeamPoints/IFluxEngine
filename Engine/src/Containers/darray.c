@@ -36,7 +36,7 @@ void _darray_field_set(void* array, u64 field, u64 value)
 
 void* _darray_resize(void* array)
 {
-    u64 lenght = darray_lenght(array);
+    u64 lenght = darray_length(array);
     u64 stride = darray_stride(array);
     void* temp = _darray_create((DARRAY_RESIZE_FACTOR * darray_capacity(array)), stride);
     fcopy_memory(temp, array, lenght * stride);
@@ -47,7 +47,7 @@ void* _darray_resize(void* array)
 
 void* _darray_push(void* array, const void* value_ptr)
 {
-    u64 length = darray_lenght(array);
+    u64 length = darray_length(array);
     u64 stride = darray_stride(array);
     if(length >= darray_capacity(array))
     {
@@ -62,7 +62,7 @@ void* _darray_push(void* array, const void* value_ptr)
 
 void* _darray_pop(void* array, u64 index, void* dest)
 {
-    u64 length = darray_lenght(array);
+    u64 length = darray_length(array);
     u64 stride = darray_stride(array);
     if(index >=  length)
     {
@@ -86,7 +86,7 @@ void* _darray_pop(void* array, u64 index, void* dest)
 
 void* _darray_pop_at(void* array, u64 index, void* dest) 
 {
-    u64 length = darray_lenght(array);
+    u64 length = darray_length(array);
     u64 stride = darray_stride(array);
     if (index >= length) 
     {
@@ -111,7 +111,7 @@ void* _darray_pop_at(void* array, u64 index, void* dest)
 
 void* _darray_insert_at(void* array, u64 index, void* value_ptr)
 {
-    u64 length = darray_lenght(array);
+    u64 length = darray_length(array);
     u64 stride = darray_stride(array);
     if(index >= length)
     {

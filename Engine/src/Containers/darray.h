@@ -73,7 +73,7 @@ FAPI void* _darray_insert_at(void* array, u64 index, void* value_ptr);
 #define darray_capacity(array)                              \
         _darray_field_get(array, DARRAY_CAPACITY)           
 
-#define darray_lenght(array)                                \
+#define darray_length(array)                                \
         _darray_field_get(array, DARRAY_LENGTH)             
 
 #define darray_stride(array)                                \

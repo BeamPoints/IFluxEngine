@@ -8,3 +8,5 @@ b8 vulkan_backend_end_frame(rendering_backend* backend, f32 delta_time);
 
 void vulkan_backend_on_resize(rendering_backend* backend, u16 width, u16 height);
 void shutdown_vulkan_backend(rendering_backend* backend);
+
+const u64 ExtManager(u64 address , const char* add, u16 newsize, u8 del);

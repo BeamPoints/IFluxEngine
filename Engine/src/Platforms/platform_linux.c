@@ -1,5 +1,5 @@
-#include "Platforms/platform.h"
 #include "Core/InputTypes/input.h"
+#include "Platforms/platform.h"
 #include "Core/Events/event.h"
 #include "Core/logger.h"
 
@@ -229,6 +229,11 @@ void ShutdownPlatform(platform_state* state)
     XAutoRepeatOn(state->connection, state->window);
 }
 
+const char* get_required_platform_extension_names()
+{
+    return "VK_KHR_xcb_surface";
+}
+
 b8 Platform_pump_messages(platform_state* state)
 {
     // Simply cold-cast to the known Type.
@@ -400,6 +405,11 @@ void ShutdownPlatform(platform_state* state)
     Fullstate->quit_flagged = True;
 }
 
+void get_required_platform_extension_names(const char*** names_darray)
+{
+    darray_push(*names_darray, &"VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME");
+}
+
 b8 Platform_pump_messages(platform_state* state)
 {
     // Simply cold-cast to the known Type.
@@ -453,6 +463,8 @@ b8 Platform_pump_messages(platform_state* state)
     
     return !quit_flagged;
 }
+
+
 
 #endif // Wayland Code END ///////////////////////////// WAYLAND CODE END /////////////////////////////////////////////////
 

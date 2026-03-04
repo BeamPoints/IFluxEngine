@@ -63,7 +63,7 @@ b8 event_register(u16 code, void* listener, PFN_on_event on_event)
     {
         state.registerd[code].events = darray_create(registerd_event);
     }   
-    u64 registered_count = darray_lenght(state.registerd[code].events);
+    u64 registered_count = darray_length(state.registerd[code].events);
     for(u64 i = 0; i < registered_count; i++)
     {
         if(state.registerd[code].events[i].listner == listener)
@@ -96,7 +96,7 @@ b8 event_unregister(u16 code, void* listner, PFN_on_event on_event)
         return False;
     }
 
-    u64 registered_count = darray_lenght(state.registerd[code].events);
+    u64 registered_count = darray_length(state.registerd[code].events);
     for(u64 i = 0; i < registered_count; i++)
     {
         registerd_event e = state.registerd[code].events[i];
@@ -126,7 +126,7 @@ b8 event_fire(u16 code, void* sender, event_context context)
         return False;
     }
 
-    u64 registerd_count = darray_lenght(state.registerd[code].events); 
+    u64 registerd_count = darray_length(state.registerd[code].events); 
     for(u64 i = 0; i < registerd_count; i++)
     {
         registerd_event e = state.registerd[code].events[i];

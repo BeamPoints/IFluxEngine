@@ -166,6 +166,8 @@ b8 application_run()
         }
     }
     app_state.is_running = False;
+
+    shutdown_rendering();
     event_unregister(EVENT_CODE_APPLICATION_QUIT,0,application_on_event);
     event_unregister(EVENT_CODE_KEYPRESSED, 0 , application_on_key);
     event_unregister(EVENT_CODE_KEYRELEASED, 0 , application_on_key);
