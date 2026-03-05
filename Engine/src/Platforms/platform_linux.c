@@ -1,3 +1,4 @@
+#include "Core/Rendering/Interfaces/Vulkan/V_Types.inl"
 #include "Core/InputTypes/input.h"
 #include "Platforms/platform.h"
 #include "Core/Events/event.h"
@@ -14,6 +15,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>,
+
+#define VK_USE_PLATFORM_XCB_KHR
+#include <vulkan/vulkan.h>
+
+
 
 keys translate_keycode(u32 x_keycode);
 
@@ -34,6 +40,7 @@ typedef struct internal_state
     xcb_screen_t *screen;
     xcb_atom_t wm_protocols;
     xcb_atom_t wm_delete_window;
+    VkSurfaceKHR surface;
 } internal_state;
 
 b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
@@ -349,6 +356,7 @@ typedef struct internal_state
     wl_shell *shell;
     wl_seat *seat;
     uint32_t wm_delete_win;
+    VkSurfaceKHR surface;
 } internal_state;
 
 b8 PlatformStartup(platform_state* state, const char* application_name, i32 x, i32 y, i32 width, i32 height, b8 fullscreen)
@@ -467,6 +475,31 @@ b8 Platform_pump_messages(platform_state* state)
 
 
 #endif // Wayland Code END ///////////////////////////// WAYLAND CODE END /////////////////////////////////////////////////
+// Vulkan Surface Binding -> Mapping
+b8 platform_create_vulkan_surface(platform_state* plat_sate, vulkan_context* context)
+{
+    internal_state* state = (internal_state*)plat_state->internal_state;
+
+    VkScbSurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR};
+    create_info.connection = state->connection;
+    create_info.window = state->window;
+
+    VkResult result = vkCreateXcbSurfaceKHR
+    (
+        context->instance,
+        &create_info,
+        context->allocator,
+        &state->surface
+    );
+    if(result != VK_SUCCESS);
+    {
+        FFATAL("Vulkan Surface Creation Failed.");
+        return False;
+    }
+
+    context->surface = state->surface;
+    return True;
+}
 
 
 void* Platform_allocate(u64 size, b8 aligned)

@@ -1,5 +1,6 @@
 #include "Core/Rendering/Interfaces/Vulkan/V_Backend.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Types.inl"
+#include "Core/Rendering/Interfaces/Vulkan/V_Device.h"
 
 #include "Core/Rendering/Interfaces/Vulkan/V_Platform.h"
 #include "Core/DataTypes/fstring.h"
@@ -167,6 +168,21 @@ FINFO("Vulkan Instance Created");
     VK_CHECK(func(context.instance, &debug_create_info,context.allocator,&context.debug_messenger));
     FDEBUG("Vulkan Debugger Created");
 #endif
+    //Vulkan Surface Creation
+    FDEBUG("Creating Vulkan Surface...");
+    if(!platform_create_vulkan_surface(platform_state, & context))
+    {
+        FERROR("Failed to create platform Surface");
+        return False;
+    }
+    FDEBUG("Vulkan Surface Created");
+    
+    //Vulkan Device Creation
+    if(!vulkan_device_create(&context))
+    {
+        FERROR("Failed to Create Device");
+        return False;
+    }
 
     FINFO("Vulkan Rendering Init Successfully");
     return True;
