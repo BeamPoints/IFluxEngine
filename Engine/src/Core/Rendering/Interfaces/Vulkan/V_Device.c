@@ -18,10 +18,10 @@ typedef struct vulkan_physical_device_reqirements
 
 typedef struct vulkan_physical_device_queue_family_info
 {
-    u32 graphics_family_index;
-    u32 present_family_index;
-    u32 compute_family_index;
-    u32 transfer_family_index;
+    u32 graphics_queue_index;
+    u32 present_queue_index;
+    u32 compute_queue_index;
+    u32 transfer_queue_index;
 }vulkan_physical_device_queue_family_info;
 
 b8 select_physical_device(vulkan_context* context);
@@ -42,12 +42,152 @@ b8 vulkan_device_create(vulkan_context* context)
     {
         return False;
     }
+
+    FINFO("Creating Logical Device...");
+    b8 present_shared_graphics_queue = context->device.graphics_queue_index == context->device.present_queue_index;
+    b8 transfer_shared_graphics_queue = context->device.graphics_queue_index == context->device.transfer_queue_index;
+    u32 index_count = 1;
+    if(!present_shared_graphics_queue)
+    {
+        index_count++;
+    }
+    if(!transfer_shared_graphics_queue)
+    {
+        index_count++;
+    }
+    u32 indices[index_count];
+    u8 index = 0;
+    indices[index++] = context->device.graphics_queue_index;
+    if(!present_shared_graphics_queue)
+    {
+        indices[index++] = context->device.present_queue_index;
+    }
+    if(!transfer_shared_graphics_queue)
+    {
+        indices[index++] = context->device.transfer_queue_index;
+    }
+
+    VkDeviceQueueCreateInfo queue_create_infos[index_count];
+    for(u32 i = 0; i < index_count; ++i)
+    {
+        queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_create_infos[i].queueFamilyIndex = indices[i];
+        queue_create_infos[i].queueCount = 1;
+        if(indices[i] == context->device.graphics_queue_index)
+        {
+            queue_create_infos[i].queueCount = 1;
+        }
+        queue_create_infos[i].flags = 0;
+        queue_create_infos[i].pNext = 0;
+        f32 queue_priority = 1.0f;
+        queue_create_infos[i].pQueuePriorities = &queue_priority;
+    }
+
+    //Request device Features
+    // TODO: should be config driven
+    VkPhysicalDeviceFeatures device_features = {};
+    device_features.samplerAnisotropy = VK_TRUE; // Request Anistrophy
+
+    VkDeviceCreateInfo device_create_info = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
+    device_create_info.queueCreateInfoCount = index_count;
+    device_create_info.pQueueCreateInfos = queue_create_infos;
+    device_create_info.pEnabledFeatures = &device_features;
+    device_create_info.enabledExtensionCount = 1;
+    const char* extension_names = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    device_create_info.ppEnabledExtensionNames = &extension_names;
+
+    //Deprecated and ignored, so pass nothing.
+    device_create_info.enabledLayerCount = 0;
+    device_create_info.ppEnabledLayerNames = 0;
+
+    //Create this Device
+    VK_CHECK
+    (
+        vkCreateDevice
+        (
+            context->device.physical_device,
+            &device_create_info,
+            context->allocator,
+            &context->device.logical_device
+        )
+    );
+    FINFO("Logical Device Created");
+    //GetQueues
+    vkGetDeviceQueue
+    (
+        context->device.logical_device,
+        context->device.graphics_queue_index,
+        0,
+        &context->device.graphics_queue
+    );
+    vkGetDeviceQueue
+    (
+        context->device.logical_device,
+        context->device.present_queue_index,
+        0,
+        &context->device.present_queue
+    );
+    vkGetDeviceQueue
+    (
+        context->device.logical_device,
+        context->device.transfer_queue_index,
+        0,
+        &context->device.transfer_queue
+    );
+    FINFO("QUEUES OBTAINED");
+
     return True;
 }
 
 void vulkan_device_destroy(vulkan_context* context)
 {
+    //UnsetQueues
+    context->device.graphics_queue = 0;
+    context->device.transfer_queue = 0;
+    context->device.present_queue = 0;
 
+
+    //Destroy Logical Device
+    FINFO("Destroying Logical Device ...");
+    if(context->device.logical_device)
+    {
+        vkDestroyDevice(context->device.logical_device, context->allocator);
+        context->device.logical_device = 0;
+    }
+
+    FINFO("Releasing Physical device resources...");
+    context->device.physical_device = 0;
+
+    if(context->device.swapchain_support.formats)
+    {
+        ffree
+        (
+            context->device.swapchain_support.formats,
+            sizeof(VkSurfaceFormatKHR) * context->device.swapchain_support.format_count,
+            MEMORY_TAG_REDERING
+        );
+        context->device.swapchain_support.formats = 0;
+        context->device.swapchain_support.format_count = 0;
+    }
+    if(context->device.swapchain_support.present_modes)
+    {
+        ffree
+        (
+            context->device.swapchain_support.present_modes,
+            sizeof(VkPresentModeKHR) * context->device.swapchain_support.present_mode_count,
+            MEMORY_TAG_REDERING
+        );
+        context->device.swapchain_support.present_modes = 0;
+        context->device.swapchain_support.present_mode_count = 0;
+    }
+    fzero_memory
+    (
+        &context->device.swapchain_support.capabilities,
+        sizeof(context->device.swapchain_support.capabilities)
+    );
+    context->device.graphics_queue_index = -1;
+    context->device.transfer_queue_index = -1;
+    context->device.present_queue_index = -1;
 }
 
 void vulkan_device_query_swapchain_support
@@ -213,9 +353,9 @@ b8 select_physical_device(vulkan_context* context)
                 }
             }
             context->device.physical_device = physical_devices[i];
-            context->device.graphics_family_index = queue_info.graphics_family_index;
-            context->device.present_family_index = queue_info.present_family_index;
-            context->device.transfer_family_index = queue_info.transfer_family_index;
+            context->device.graphics_queue_index = queue_info.graphics_queue_index;
+            context->device.present_queue_index = queue_info.present_queue_index;
+            context->device.transfer_queue_index = queue_info.transfer_queue_index;
 
             context->device.properties = properties;
             context->device.features = features;
@@ -245,10 +385,10 @@ b8 physical_device_meets_requirements
 )
 {
     //Evaluate device probertys to determine if it meets the needs of our application;
-    out_queue_info->graphics_family_index = -1;
-    out_queue_info->transfer_family_index = -1;
-    out_queue_info->compute_family_index = -1;
-    out_queue_info->present_family_index = -1;
+    out_queue_info->graphics_queue_index = -1;
+    out_queue_info->transfer_queue_index = -1;
+    out_queue_info->compute_queue_index = -1;
+    out_queue_info->present_queue_index = -1;
 
     if(requirements->dedicated_gpu)
     {
@@ -271,26 +411,29 @@ b8 physical_device_meets_requirements
         u8 current_transfer_score = 0;
 
         //Graphics Queue? 
-        if(queue_families[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
+        if(queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
-            out_queue_info->graphics_family_index = i;
+            out_queue_info->graphics_queue_index = i;
             ++current_transfer_score;
+            //FTRACE("VK_QUEUE_GRAPHICS_BIT = QUEUE_FAMILY : %d", i);
         }
         //Compute Queue?
         if(queue_families[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
         {
-            out_queue_info->compute_family_index = i;
+            out_queue_info->compute_queue_index = i;
             ++current_transfer_score;
+            //FTRACE("VK_QUEUE_COMPUTE_BIT = QUEUE_FAMILY : %d", i);
         }
         //Transfer Queue?
-        if(queue_families[i].queueFlags & VK_QUEUE_COMPUTE_BIT)
+        if(queue_families[i].queueFlags & VK_QUEUE_TRANSFER_BIT)
         {
             //TAKE the index if it is the current lowest. The increase the
             //liklihood that it is a dedicateed transfer Queue.
             if(current_transfer_score <= min_transfer_score)
             {
                 min_transfer_score = current_transfer_score;
-                out_queue_info->transfer_family_index = i;
+                out_queue_info->transfer_queue_index = i;
+                //FTRACE("VK_QUEUE_TRANSFER_BIT = QUEUE_FAMILY : %d", i);
             }
         }
         //Present Queue? 
@@ -298,31 +441,31 @@ b8 physical_device_meets_requirements
         VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &supports_present));
         if(supports_present)
         {
-            out_queue_info->present_family_index = i;
+            out_queue_info->present_queue_index = i;
         }
     }
     FINFO
     (
         "       %d |       %d |       %d |        %d | %s",
-        out_queue_info->graphics_family_index != -1,
-        out_queue_info->present_family_index != -1,
-        out_queue_info->compute_family_index != -1,
-        out_queue_info->transfer_family_index != -1,
+        out_queue_info->graphics_queue_index != -1,
+        out_queue_info->present_queue_index != -1,
+        out_queue_info->compute_queue_index != -1,
+        out_queue_info->transfer_queue_index != -1,
         properties->deviceName
     );
     if
     (
-        (!requirements->graphics    || (requirements->graphics && out_queue_info->graphics_family_index != -1)) &&
-        (!requirements->present     || (requirements->present && out_queue_info->present_family_index != -1  )) &&
-        (!requirements->compute     || (requirements->compute && out_queue_info->compute_family_index != -1  )) &&
-        (!requirements->transfer    || (requirements->transfer && out_queue_info->transfer_family_index != -1))
+        (!requirements->graphics    || (requirements->graphics && out_queue_info->graphics_queue_index != -1)) &&
+        (!requirements->present     || (requirements->present && out_queue_info->present_queue_index != -1  )) &&
+        (!requirements->compute     || (requirements->compute && out_queue_info->compute_queue_index != -1  )) &&
+        (!requirements->transfer    || (requirements->transfer && out_queue_info->transfer_queue_index != -1))
     )
     {
         FINFO("Device meets queue requirements");
-        FTRACE("Graphics Family Index %i", out_queue_info->graphics_family_index);
-        FTRACE("Present  Family Index %i", out_queue_info->present_family_index);
-        FTRACE("Compute  Family Index %i", out_queue_info->compute_family_index);
-        FTRACE("Transfer Family Index %i", out_queue_info->transfer_family_index);
+        FTRACE("Graphics Family Index %i", out_queue_info->graphics_queue_index);
+        FTRACE("Present  Family Index %i", out_queue_info->present_queue_index);
+        FTRACE("Compute  Family Index %i", out_queue_info->compute_queue_index);
+        FTRACE("Transfer Family Index %i", out_queue_info->transfer_queue_index);
         //Swapchain Support
         vulkan_device_query_swapchain_support(device, surface, out_swapchain_support);
 
