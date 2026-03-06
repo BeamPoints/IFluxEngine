@@ -3,6 +3,7 @@
 #include "Core/Rendering/Interfaces/Vulkan/V_Device.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Swapchain.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Platform.h"
+#include "Core/Rendering/Interfaces/Vulkan/V_Renderpass.h"
 #include "Core/DataTypes/fstring.h"
 #include "Core/Memory/Fmemory.h"
 #include "Containers/darray.h"
@@ -183,7 +184,7 @@ FINFO("Vulkan Instance Created");
     FDEBUG("Vulkan Surface Created");
     
     //Vulkan Device Creation
-    if(!vulkan_device_create(&context))
+    if(!create_vulkan_device(&context))
     {
         FERROR("Failed to Create Device");
         return False;
@@ -191,6 +192,17 @@ FINFO("Vulkan Instance Created");
 
     //Swapchain
     create_vulkan_swapchain(&context, context.framebuffer_width, context.framebuffer_height, &context.swapchain);
+
+    //RenderPass
+    create_vulkan_renderpass
+    (
+        &context,
+        &context.main_renderpass,
+        0, 0, context.framebuffer_width, context.framebuffer_height,
+        0.901f, 0.494f, 0.0f, 1.0f,
+        1.0f,
+        0
+    );
 
     FINFO("Vulkan Rendering Init Successfully");
     return True;
@@ -213,6 +225,25 @@ void vulkan_backend_on_resize(rendering_backend* backend, u16 width, u16 height)
 
 void shutdown_vulkan_backend(rendering_backend* backend)
 {
+    //Destroy in opposite order of creation.
+
+    //Renderpass
+    destroy_vulkan_renderpass(&context, &context.main_renderpass);
+
+    //Swapchain
+    destroy_vulkan_swapchain(&context, &context.swapchain);
+
+    FDEBUG("DESTROYING Vulkan Device");
+    destroy_vulkan_device(&context);
+
+    FDEBUG("DESTROYING Vulkan Surface");
+    if(context.surface)
+    {
+        vkDestroySurfaceKHR(context.instance, context.surface, context.allocator);
+        context.surface = 0;
+    }
+
+
     FDEBUG("DESTROYING DEBUGGER");
     if(context.debug_messenger)
     {

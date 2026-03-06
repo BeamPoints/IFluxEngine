@@ -52,6 +52,26 @@ typedef struct vulkan_image
     VkDeviceMemory memory;
 }vulkan_image;
 //      vulkan_image
+//      vulkan_renderpass & State
+typedef enum vulkan_renderpass_state
+{
+    READY,
+    RECORDING,
+    IN_RENDER_PASS,
+    RECORDING_ENDED,
+    SUBMITTED,
+    NOT_ALLOCATED
+}vulkan_renderpass_state;
+typedef struct vulkan_renderpass
+{
+    VkRenderPass handle;
+    f32 x, y, w, h;
+    f32 r, g, b, a;
+    f32 depth;
+    u32 stencil;
+    vulkan_renderpass_state state;
+}vulkan_renderpass;
+//      vulkan_renderpass & State
 //      vulkan_swapchain
 typedef struct vulkan_swapchain
 {
@@ -64,6 +84,22 @@ typedef struct vulkan_swapchain
     vulkan_image depth_attachment;
 }vulkan_swapchain;
 //      vulkan_swapchain
+//      vulkan_command_buffer & State
+typedef enum vulkan_command_buffer_state
+{
+    COMMAND_BUFFER_STATE_READY,
+    COMMAND_BUFFER_STATE_RECORDING,
+    COMMAND_BUFFER_STATE_IN_RENDER_PASS,
+    COMMAND_BUFFER_STATE_RECORDING_ENDED,
+    COMMAND_BUFFER_STATE_SUBMITTED,
+    COMMAND_BUFFER_STATE_NOT_ALLOCATED
+}vulkan_command_buffer_state;
+typedef struct vulkan_command_buffer
+{
+    VkCommandBuffer handle;
+    vulkan_command_buffer_state state;
+}vulkan_command_buffer;
+//      vulkan_command_buffer & State
 //      vulkan_context
 typedef struct vulkan_context
 {
@@ -77,7 +113,7 @@ typedef struct vulkan_context
     vulkan_device device;
     VkSurfaceKHR surface;
     vulkan_swapchain swapchain;
-
+    vulkan_renderpass main_renderpass;
 
 #if defined(_DEBUG)
     VkDebugUtilsMessengerEXT debug_messenger;

@@ -2,9 +2,9 @@
 
 #include "Core/Rendering/Interfaces/Vulkan/V_Types.inl"
 
-b8 vulkan_device_create(vulkan_context* context);
+b8 create_vulkan_device(vulkan_context* context);
 
-void vulkan_device_destroy(vulkan_context* context);
+void destroy_vulkan_device(vulkan_context* context);
 
 void vulkan_device_query_swapchain_support
 (

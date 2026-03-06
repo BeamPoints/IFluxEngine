@@ -36,7 +36,7 @@ b8 physical_device_meets_requirements
     vulkan_swapchain_support_info* out_swapchain_support
 ); 
 
-b8 vulkan_device_create(vulkan_context* context)
+b8 create_vulkan_device(vulkan_context* context)
 {
     if(!select_physical_device(context))
     {
@@ -141,7 +141,7 @@ b8 vulkan_device_create(vulkan_context* context)
     return True;
 }
 
-void vulkan_device_destroy(vulkan_context* context)
+void destroy_vulkan_device(vulkan_context* context)
 {
     //UnsetQueues
     context->device.graphics_queue = 0;
