@@ -1,7 +1,7 @@
 #include "Core/Rendering/Interfaces/Vulkan/V_Backend.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Types.inl"
 #include "Core/Rendering/Interfaces/Vulkan/V_Device.h"
-
+#include "Core/Rendering/Interfaces/Vulkan/V_Swapchain.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Platform.h"
 #include "Core/DataTypes/fstring.h"
 #include "Core/Memory/Fmemory.h"
@@ -18,8 +18,13 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(VkDebugUtilsMessageSeverityFlag
                                                  const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
                                                  void* userdata);
 
+i32 find_memory_index(u32 type_filter, u32 property_flags);
+
 b8 initalize_vulkan_backend(rendering_backend* backend, const char* application_name, struct platform_state* platform_state)
 {
+    //Function Pointer
+    context.find_memory_index = find_memory_index;
+
     //TODO: Custom Allocator
     context.allocator = NULL;
 
@@ -184,6 +189,9 @@ FINFO("Vulkan Instance Created");
         return False;
     }
 
+    //Swapchain
+    create_vulkan_swapchain(&context, context.framebuffer_width, context.framebuffer_height, &context.swapchain);
+
     FINFO("Vulkan Rendering Init Successfully");
     return True;
 }
@@ -288,4 +296,22 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(VkDebugUtilsMessageSeverityFlag
         }
     }   
     return VK_FALSE;
+}
+
+i32 find_memory_index(u32 type_filter, u32 property_flags)
+{
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(context.device.physical_device, &memory_properties);
+
+    for(u32 i = 0; i < memory_properties.memoryTypeCount; ++i)
+    {
+        //Check each memory type to see if its bit is set to 1
+        if(type_filter & (1 << i) && (memory_properties.memoryTypes[i].propertyFlags & property_flags) == property_flags)
+        {
+            return i;
+        }
+    }
+
+    FWARN("Unable to find suitable memory type !");
+    return -1;
 }

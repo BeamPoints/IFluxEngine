@@ -38,20 +38,53 @@ typedef struct vulkan_device
     VkQueue graphics_queue;
     VkQueue transfer_queue;
     VkQueue present_queue;
+
+    VkFormat depth_format;
 }vulkan_device;
 //      vulkan_device
-
+//      vulkan_image
+typedef struct vulkan_image
+{
+    u32 width;
+    u32 height;
+    VkImage handle;
+    VkImageView view;
+    VkDeviceMemory memory;
+}vulkan_image;
+//      vulkan_image
+//      vulkan_swapchain
+typedef struct vulkan_swapchain
+{
+    VkSurfaceFormatKHR image_format;
+    VkSwapchainKHR handel;
+    u8 max_frames_in_flight;
+    u32 image_count;
+    VkImage* images;
+    VkImageView* views;
+    vulkan_image depth_attachment;
+}vulkan_swapchain;
+//      vulkan_swapchain
 //      vulkan_context
 typedef struct vulkan_context
 {
+    b8 recreating_swapchain;
+    u32 image_index;
+    u32 current_frame;
+    u32 framebuffer_width;
+    u32 framebuffer_height;
     VkInstance instance;
     VkAllocationCallbacks* allocator;
     vulkan_device device;
     VkSurfaceKHR surface;
+    vulkan_swapchain swapchain;
+
 
 #if defined(_DEBUG)
     VkDebugUtilsMessengerEXT debug_messenger;
 #endif
+    //place for FUNC Pointer
+    i32 (*find_memory_index)(u32 type_filter, u32 property_flags);
+
 }vulkan_context;
 //      vulkan_context
 
