@@ -310,7 +310,12 @@ b8 Platform_pump_messages(platform_state* state)
             } 
             case XCB_CONFIGURE_NOTIFY: // REZIZING
             {
-                
+                xcb_motion_notify_event_t *configure_event = (xcb_motion_notify_event_t *)event;
+
+                event_context context;
+                context.data.u16[0] = configure_event->width;
+                context.data.u16[1] = configure_event->height;
+                event_fire(EVENT_CODE_RESIZED, 0, context);
             }
             case: XCB_CLIENT_MESSAGE:
             {
@@ -449,7 +454,7 @@ b8 Platform_pump_messages(platform_state* state)
             }
             case XCB_MOTION_NOTIFY: // MOUSE MOVEMENT
             break;
-            case XCB_CONFIGURE_NOTIFY: // REZIZING
+            case XCB_CONFIGURE_NOTIFY:
             {
                 
             }

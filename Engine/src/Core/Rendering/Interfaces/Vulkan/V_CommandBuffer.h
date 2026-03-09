@@ -5,7 +5,7 @@ void allocate_vulkan_command_buffer(vulkan_context* context, VkCommandPool pool,
 
 void free_vulkan_command_buffer(vulkan_context* context, VkCommandPool pool, vulkan_command_buffer* command_buffer);
 
-void begin_vulkan_command_bufer(vulkan_command_buffer* command_buffer, b8 is_single_use, b8 is_renderpass_contine, b8 is_simultaneouse_use);
+void begin_vulkan_command_buffer(vulkan_command_buffer* command_buffer, b8 is_single_use, b8 is_renderpass_contine, b8 is_simultaneouse_use);
 
 void end_vulkan_command_buffer(vulkan_command_buffer* command_buffer);
 

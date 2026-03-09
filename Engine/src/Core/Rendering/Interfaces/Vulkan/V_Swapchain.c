@@ -84,7 +84,7 @@ void vulkan_swapchain_present
 void create(vulkan_context* context, u32 width, u32 height, vulkan_swapchain* swapchain)
 {
     VkExtent2D swapchain_extent = {width, height};
-    swapchain->max_frames_in_flight = 2;    // Trippeld Bufferd may handeled from config in Future
+    swapchain->max_frames_in_flight = 3;    // Trippeld Bufferd may handeled from config in Future
 
     b8 found = False;
     for(u32 i = 0; i < context->device.swapchain_support.format_count; ++i)
@@ -229,6 +229,7 @@ void create(vulkan_context* context, u32 width, u32 height, vulkan_swapchain* sw
 
 void destroy(vulkan_context* context, vulkan_swapchain* swapchain)
 {
+    vkDeviceWaitIdle(context->device.logical_device);
     destroy_image_vulkan(context, &swapchain->depth_attachment);
 
     //Only destroy this views, not the images, since those are owned by the swapchain

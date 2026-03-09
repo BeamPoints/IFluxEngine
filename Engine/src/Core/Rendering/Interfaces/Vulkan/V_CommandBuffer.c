@@ -24,7 +24,7 @@ void free_vulkan_command_buffer(vulkan_context* context, VkCommandPool pool, vul
     command_buffer->state = COMMAND_BUFFER_STATE_NOT_ALLOCATED;
 }
 
-void begin_vulkan_command_bufer(vulkan_command_buffer* command_buffer, b8 is_single_use, b8 is_renderpass_contine, b8 is_simultaneouse_use)
+void begin_vulkan_command_buffer(vulkan_command_buffer* command_buffer, b8 is_single_use, b8 is_renderpass_contine, b8 is_simultaneouse_use)
 {
     VkCommandBufferBeginInfo begin_info = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     begin_info.flags = 0;
@@ -67,7 +67,7 @@ void reset_vulkan_command_buffer(vulkan_command_buffer* command_buffer)
 void allocate_and_begin_single_use_vulkan_command_buffer(vulkan_context* context, VkCommandPool pool, vulkan_command_buffer* command_buffer)
 {
     allocate_vulkan_command_buffer(context,pool, True, command_buffer);
-    begin_vulkan_command_bufer(command_buffer, True, False, False);
+    begin_vulkan_command_buffer(command_buffer, True, False, False);
 }
 
 /**

@@ -127,6 +127,8 @@ typedef struct vulkan_context
     u32 framebuffer_width;
     u32 framebuffer_height;
     u32 in_flight_fence_count;
+    u64 framebuffer_size_generation;
+    u64 framebuffer_old_size_generation;
 
     VkInstance instance;
     VkSurfaceKHR surface;

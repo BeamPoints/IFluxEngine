@@ -36,6 +36,18 @@ b8 rendering_end_frame(f32 delta_time)
     return result;
 }
 
+void rendering_on_resized(u16 width, u16 height)
+{
+    if(backend)
+    {
+        backend->resized(backend, width, height);
+    }
+    else
+    {
+        FWARN("Renderer Backend does not exist to accept resize: %i %i", width, height);
+    }
+}
+
 b8 rendering_draw_frame(rendering_packet* packet)
 {
     if(rendering_begin_frame(packet->delta_time))
@@ -57,3 +69,4 @@ void shutdown_rendering()
     backend->shutdown(backend);
     ffree(backend, sizeof(rendering_backend), MEMORY_TAG_REDERING);
 }
+

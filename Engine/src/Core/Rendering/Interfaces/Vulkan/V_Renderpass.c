@@ -11,6 +11,18 @@ void create_vulkan_renderpass
     u32 stencil
 )
 {
+    out_renderpass->x = x;
+    out_renderpass->y = y;
+    out_renderpass->w = w;
+    out_renderpass->h = h;
+    out_renderpass->depth = depth;
+    out_renderpass->stencil = stencil;
+
+    out_renderpass->r = r;
+    out_renderpass->g = g;
+    out_renderpass->b = b;
+    out_renderpass->a = a;
+    
     //Main subpass
     VkSubpassDescription2 subpass = {VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_2};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -81,7 +93,7 @@ void create_vulkan_renderpass
     dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency.srcAccessMask = 0;
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT; //     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
     dependency.dependencyFlags = 0;
 
     //Render pass create
@@ -120,7 +132,7 @@ void begin_vulkan_renderpass
     begin_info.renderArea.offset.x = renderpass->x;
     begin_info.renderArea.offset.y = renderpass->y;
     begin_info.renderArea.extent.width = renderpass->w;
-    begin_info.renderArea.extent.width = renderpass->h;
+    begin_info.renderArea.extent.height = renderpass->h;
 
     VkClearValue clear_values[2];
     fzero_memory(clear_values, sizeof(VkClearValue) * 2);
