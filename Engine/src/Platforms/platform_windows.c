@@ -1,4 +1,5 @@
 #include "Platforms/platform.h"
+#include "Core/Events/event.h"
 //For Vulkan Surface
 #include "Core/Rendering/Interfaces/Vulkan/V_Types.inl"
 
@@ -241,8 +242,9 @@ LRESULT CALLBACK win32_process_message(HWND hwnd, u32 msg, WPARAM w_param, LPARA
         }
         case WM_CLOSE:
         {
-            // TODO: Fire Event to Quit Application 
-            return 0;
+            event_context data = {};
+            event_fire(EVENT_CODE_APPLICATION_QUIT,0,data);
+            return True;
         }
         case WM_DESTROY:
         {

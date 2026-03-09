@@ -4,6 +4,7 @@
 #include "Core/Rendering/Interfaces/Vulkan/V_Swapchain.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Platform.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Renderpass.h"
+#include "Core/Rendering/Interfaces/Vulkan/V_CommandBuffer.h"
 #include "Core/DataTypes/fstring.h"
 #include "Core/Memory/Fmemory.h"
 #include "Containers/darray.h"
@@ -20,6 +21,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(VkDebugUtilsMessageSeverityFlag
                                                  void* userdata);
 
 i32 find_memory_index(u32 type_filter, u32 property_flags);
+
+void create_command_buffers(rendering_backend* backend);
+void destroy_command_buffers(rendering_backend* backend);
 
 b8 initalize_vulkan_backend(rendering_backend* backend, const char* application_name, struct platform_state* platform_state)
 {
@@ -204,6 +208,9 @@ FINFO("Vulkan Instance Created");
         0
     );
 
+    //Create Command Buffer
+    create_command_buffers(backend);
+
     FINFO("Vulkan Rendering Init Successfully");
     return True;
 }
@@ -226,6 +233,9 @@ void vulkan_backend_on_resize(rendering_backend* backend, u16 width, u16 height)
 void shutdown_vulkan_backend(rendering_backend* backend)
 {
     //Destroy in opposite order of creation.
+
+    //Destroy Command Buffer
+    destroy_command_buffers(backend);
 
     //Renderpass
     destroy_vulkan_renderpass(&context, &context.main_renderpass);
@@ -345,4 +355,40 @@ i32 find_memory_index(u32 type_filter, u32 property_flags)
 
     FWARN("Unable to find suitable memory type !");
     return -1;
+}
+
+void create_command_buffers(rendering_backend* backend)
+{
+    if(!context.graphics_command_buffers)
+    {
+        context.graphics_command_buffers = darray_reserve(vulkan_command_buffer, context.swapchain.image_count);
+        for(u32 i = 0; i < context.swapchain.image_count; ++i)
+        {
+            fzero_memory(&context.graphics_command_buffers[i], sizeof(vulkan_command_buffer));
+        }
+    }
+    for(u32 i = 0; i < context.swapchain.image_count; ++i)
+    {
+        if(context.graphics_command_buffers[i].handle)
+        {
+            free_vulkan_command_buffer(&context, context.device.graphics_command_pool, &context.graphics_command_buffers[i]);
+        }
+        fzero_memory(&context.graphics_command_buffers[i], sizeof(vulkan_command_buffer));
+        allocate_vulkan_command_buffer(&context, context.device.graphics_command_pool, True, &context.graphics_command_buffers[i]);
+    }
+    FDEBUG("Vulkan Command Buffers Created.");
+}
+
+void destroy_command_buffers(rendering_backend* backend)
+{
+    for(u32 i = 0; i < context.swapchain.image_count; ++i)
+    {
+        if(context.graphics_command_buffers[i].handle)
+        {
+            free_vulkan_command_buffer(&context, context.device.graphics_command_pool, &context.graphics_command_buffers[i]);
+            context.graphics_command_buffers[i].handle = 0;
+        }
+    }
+    darray_destroy(context.graphics_command_buffers);
+    context.graphics_command_buffers = 0;
 }
