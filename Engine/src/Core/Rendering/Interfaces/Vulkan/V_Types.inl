@@ -73,6 +73,15 @@ typedef struct vulkan_renderpass
     vulkan_renderpass_state state;
 }vulkan_renderpass;
 //      vulkan_renderpass & State
+//      vulkan_framebuffer
+typedef struct vulkan_framebuffer
+{
+    VkFramebuffer handel;
+    VkImageView* attachments;
+    vulkan_renderpass* renderpass;
+    u32 attachment_count;
+}vulkan_framebuffer;
+//      vulkan_framebuffer
 //      vulkan_swapchain
 typedef struct vulkan_swapchain
 {
@@ -83,6 +92,7 @@ typedef struct vulkan_swapchain
     VkImage* images;
     VkImageView* views;
     vulkan_image depth_attachment;
+    vulkan_framebuffer* framebuffers;
 }vulkan_swapchain;
 //      vulkan_swapchain
 //      vulkan_command_buffer & State
@@ -101,6 +111,13 @@ typedef struct vulkan_command_buffer
     vulkan_command_buffer_state state;
 }vulkan_command_buffer;
 //      vulkan_command_buffer & State
+//      vulkan_fence
+typedef struct vulkan_fence
+{
+    VkFence handle;
+    b8 is_signaled;
+}vulkan_fence;
+//      vulkan_fence
 //      vulkan_context
 typedef struct vulkan_context
 {
@@ -109,20 +126,27 @@ typedef struct vulkan_context
     u32 current_frame;
     u32 framebuffer_width;
     u32 framebuffer_height;
+    u32 in_flight_fence_count;
+
     VkInstance instance;
-    VkAllocationCallbacks* allocator;
-    vulkan_device device;
     VkSurfaceKHR surface;
-    vulkan_swapchain swapchain;
-    vulkan_renderpass main_renderpass;
+    VkAllocationCallbacks* allocator;
+    VkSemaphore* image_availible_semaphores;
+    VkSemaphore* queue_complete_semaphores;
 
 #if defined(_DEBUG)
     VkDebugUtilsMessengerEXT debug_messenger;
 #endif
     //place for FUNC Pointer
     i32 (*find_memory_index)(u32 type_filter, u32 property_flags);
-    //darray 
+ 
+    //own typedef structs
+    vulkan_device device;
+    vulkan_swapchain swapchain;
+    vulkan_renderpass main_renderpass;
     vulkan_command_buffer* graphics_command_buffers;
+    vulkan_fence* in_flight_fences;
+    vulkan_fence** images_in_flight;
 }vulkan_context;
 //      vulkan_context
 

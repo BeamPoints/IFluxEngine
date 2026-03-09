@@ -5,14 +5,21 @@
 #include "Core/Rendering/Interfaces/Vulkan/V_Platform.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_Renderpass.h"
 #include "Core/Rendering/Interfaces/Vulkan/V_CommandBuffer.h"
+#include "Core/Rendering/Interfaces/Vulkan/V_FrameBuffer.h"
+#include "Core/Rendering/Interfaces/Vulkan/V_Fence.h"
 #include "Core/DataTypes/fstring.h"
 #include "Core/Memory/Fmemory.h"
 #include "Containers/darray.h"
 #include "Core/logger.h"
 
+//MAY DIRTY SHIT
+#include "Core/application.h"
+
 // static Vulkan context
 static vulkan_context context;
 static vulkan_ext_layers ext_layers;
+static u32 chached_init_heigt = 0;
+static u32 chached_init_width = 0;
 
 //DEBUG CONSOLE DEBUG
 VKAPI_ATTR VkBool32 VKAPI_CALL vk_debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messenge_Level,
@@ -24,9 +31,22 @@ i32 find_memory_index(u32 type_filter, u32 property_flags);
 
 void create_command_buffers(rendering_backend* backend);
 void destroy_command_buffers(rendering_backend* backend);
+void regenerate_framebuffers(rendering_backend* backend, vulkan_swapchain* swapchanin, vulkan_renderpass* renderpass);
 
 b8 initalize_vulkan_backend(rendering_backend* backend, const char* application_name, struct platform_state* platform_state)
 {
+    //Get Window Size
+    get_application_framebuffer_size(&chached_init_width, &chached_init_heigt);
+    if(chached_init_width == 0 && chached_init_heigt == 0)
+    {
+        FWARN("WINDOW SIZE IS 0  w: %d - h: %d",chached_init_width,chached_init_heigt);
+        FWARN("WINDOW SIZE IS 0  Fallback will trigger with = w: 800 h: 600");
+    }
+    context.framebuffer_width = (chached_init_width != 0) ? chached_init_width : 800;
+    context.framebuffer_height = (chached_init_heigt != 0) ? chached_init_heigt : 600;
+    chached_init_heigt = 0;
+    chached_init_width = 0;
+
     //Function Pointer
     context.find_memory_index = find_memory_index;
 
@@ -207,9 +227,36 @@ FINFO("Vulkan Instance Created");
         1.0f,
         0
     );
+    
+    //Create FrameBuffer
+    context.swapchain.framebuffers = darray_reserve(vulkan_framebuffer, context.swapchain.image_count);
+    regenerate_framebuffers(backend, &context.swapchain, &context.main_renderpass);
 
     //Create Command Buffer
     create_command_buffers(backend);
+
+    //Create Sync Objects
+    context.image_availible_semaphores = darray_reserve(VkSemaphore, context.swapchain.max_frames_in_flight);
+    context.queue_complete_semaphores = darray_reserve(VkSemaphore, context.swapchain.max_frames_in_flight);
+    context.in_flight_fences = darray_reserve(vulkan_fence, context.swapchain.max_frames_in_flight);
+
+    for(u8 i = 0; i < context.swapchain.max_frames_in_flight; ++i)
+    {
+        VkSemaphoreCreateInfo semaphore_create_info = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
+        vkCreateSemaphore(context.device.logical_device, &semaphore_create_info, context.allocator, &context.image_availible_semaphores[i]);
+        vkCreateSemaphore(context.device.logical_device, &semaphore_create_info, context.allocator, &context.queue_complete_semaphores[i]);
+
+        //Crate the fence in a signaled state, indicating that the first frame has already been "Rendered".
+        //this will prevent the application from witing indefinitely for the first frame to render since it 
+        //cannot be renderd until a frame is "Rendered" before it.
+        create_vulkan_fence(&context, True, &context.in_flight_fences[i]);
+    }
+    // Inflight shoud not exist at this point so i clear the list first. / And its not owned by this list
+    context.images_in_flight = darray_reserve(vulkan_fence, context.swapchain.image_count);
+    for(u32 i = 0; i < context.swapchain.image_count; ++i )
+    {
+        context.images_in_flight[i] = 0;
+    }
 
     FINFO("Vulkan Rendering Init Successfully");
     return True;
@@ -232,13 +279,49 @@ void vulkan_backend_on_resize(rendering_backend* backend, u16 width, u16 height)
 
 void shutdown_vulkan_backend(rendering_backend* backend)
 {
+    //First wait for GPU IDEL
+    vkDeviceWaitIdle(context.device.logical_device);
     //Destroy in opposite order of creation.
+
+    //Destroy Sync Objects
+    for(u8 i = 0; i < context.swapchain.max_frames_in_flight; ++i)
+    {
+        if(context.image_availible_semaphores[i])
+        {
+            vkDestroySemaphore(context.device.logical_device, context.image_availible_semaphores[i], context.allocator);
+            context.image_availible_semaphores[i] = 0;
+        }
+        if(context.queue_complete_semaphores[i])
+        {
+            vkDestroySemaphore(context.device.logical_device, context.queue_complete_semaphores[i], context.allocator);
+            context.queue_complete_semaphores[i] = 0;
+        }
+        destroy_vulkan_fence(&context, &context.in_flight_fences[i]);
+    }
+    darray_destroy(context.image_availible_semaphores);
+    context.image_availible_semaphores = 0;
+
+    darray_destroy(context.queue_complete_semaphores);
+    context.queue_complete_semaphores = 0;
+
+    darray_destroy(context.in_flight_fences);
+    context.in_flight_fences = 0;
+
+    darray_destroy(context.images_in_flight);
+    context.images_in_flight = 0;
+
 
     //Destroy Command Buffer
     destroy_command_buffers(backend);
 
     //Renderpass
     destroy_vulkan_renderpass(&context, &context.main_renderpass);
+
+    //Destroy Framebuffers
+    for(u32 i = 0; i < context.swapchain.image_count; ++i)
+    {
+        destroy_vulkan_framebuffer(&context, &context.swapchain.framebuffers[i]);
+    }
 
     //Swapchain
     destroy_vulkan_swapchain(&context, &context.swapchain);
@@ -391,4 +474,24 @@ void destroy_command_buffers(rendering_backend* backend)
     }
     darray_destroy(context.graphics_command_buffers);
     context.graphics_command_buffers = 0;
+}
+
+void regenerate_framebuffers(rendering_backend* backend, vulkan_swapchain* swapchanin, vulkan_renderpass* renderpass)
+{
+    for(u32 i = 0; i < swapchanin->image_count; ++i)
+    {
+        // TODO: make this dynamic based on current configed attachments
+        u32 attachment_count = 2;   //COLOR                     DEPTH
+        VkImageView attachments[] = {swapchanin->views[i], swapchanin->depth_attachment.view};
+        create_vulkan_framebuffer
+        (
+            &context,
+            renderpass,
+            context.framebuffer_width,
+            context.framebuffer_height,
+            attachment_count,
+            attachments,
+            &context.swapchain.framebuffers[i]
+        );
+    }
 }
