@@ -245,27 +245,29 @@ b8 application_on_resized(u16 code, void* sender, void* listner_inst, event_cont
     {
         u16 width = context.data.u16[0];
         u16 height = context.data.u16[1];
+        u8 minimized = context.data.u8[0];
 
         //Check if different. If so Triggerd a resize event
         if(width != app_state.width || height != app_state.height)
         {
             FINFO("Window Resize Happend %i %i", width, height);
+            if(app_state.is_suspended)
+            {
+                FINFO("Window Restored, Resuming App");
+                app_state.is_suspended = False;
+            }
+           
+            app_state.game_inst->onresize(app_state.game_inst, width, height);
+            rendering_on_resized(width, height);
+        }
+        if(minimized)
+        {
             if(width == 0 || height == 0)
             {
                 FINFO("Window Minimized");
                 app_state.is_suspended = True;
                 return True;
             }
-            else
-            {
-                if(app_state.is_suspended)
-                {
-                    FINFO("Window Restored, Resuming App");
-                    app_state.is_suspended = False;
-                }
-            }
-            app_state.game_inst->onresize(app_state.game_inst, width, height);
-            rendering_on_resized(width, height);
         }
     }
     // Event purposely not handled to allow other listners to get this. 
