@@ -89,3 +89,12 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 
 #define FCLAMP(value, min, max) (value <= min) ? min : (value >= max) ? max \
                                                                         : value;
+
+// INLINING
+#ifdef __MSC_VER
+#define FINLINE __forceinline
+#define FNOINLINE __declspec(noinline)
+#else
+#define FINLINE static inline
+#define FNOINLINE
+#endif
